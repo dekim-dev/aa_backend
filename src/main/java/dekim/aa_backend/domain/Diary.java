@@ -23,8 +23,14 @@ public class Diary {
   @Column(nullable = false, length = 20)
   private String title;
 
+  @Column(nullable = false)
+  private String content;
+
+  @Column(nullable = false)
+  private String conclusion;
+
   @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "memberNO")
+  @JoinColumn(name = "memberNo")
   private Member member;
 
 }

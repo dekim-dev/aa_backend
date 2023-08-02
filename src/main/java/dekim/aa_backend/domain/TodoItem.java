@@ -13,25 +13,34 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
+@Table(name = "TODO_ITEM_TB")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TodoItem {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  @Column(name = "todoItemNo")
+  @Column(name = "ItemNo")
   private Long id;
 
   @Column(nullable = false)
-  private String item;
-
-  @Column
-  private int priority;
+  private String itemName;
 
   @Enumerated(EnumType.STRING)
   private TodoItemStatus todoItemStatus;
 
+  @Column
+  private int priority;
+
   @CreatedDate
   @Column
   private LocalDateTime createdAt;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "listNo")
+  private TodoList todoList;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "memberNo")
+  private Member member;
 
 
 }

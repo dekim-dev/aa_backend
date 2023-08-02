@@ -34,6 +34,9 @@ public class Post {
   @Column
   private int viewCount;
 
+  @Column
+  private String likes;
+
   @CreatedDate
   @Column
   private LocalDateTime createdAt;
@@ -47,6 +50,6 @@ public class Post {
   private Member member;
 
   @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-  private List<Reply> replies;
+  private List<Comment> comments;
 
 }

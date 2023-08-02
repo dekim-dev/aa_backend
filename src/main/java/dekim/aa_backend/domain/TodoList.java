@@ -1,6 +1,5 @@
 package dekim.aa_backend.domain;
 
-import dekim.aa_backend.constant.TodoItemStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -9,23 +8,33 @@ import lombok.Setter;
  import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
 @Setter
+@Table(name = "TODO_LIST_TB")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TodoList {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  @Column(name = "todoListNo")
+  @Column(name = "listNo")
   private Long id;
 
   @Column(nullable = false)
-  private String todoListName;
+  private String listName;
 
   @CreatedDate
   @Column
   private LocalDateTime createdAt;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "memberNo")
+  private Member member;
+
+//  @OneToMany(mappedBy = "todoItem")
+//  private List<TodoList> todoLists = new ArrayList<>();
 
 
 }

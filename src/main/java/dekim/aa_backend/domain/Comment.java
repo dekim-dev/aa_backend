@@ -13,12 +13,12 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
-@Table(name = "REPLY_TB")
+@Table(name = "COMMENT_TB")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Reply {
+public class Comment {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  @Column(name = "replyNo")
+  @Column(name = "commentNo")
   private Long id;
 
   @Column(nullable = false, length = 1000)
@@ -36,6 +36,12 @@ public class Reply {
   @JoinColumn(name = "memberNo")
   private Member member;
 
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "postNo")
+  private Post post;
 
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "clinicNo")
+  private Clinic clinic;
 
 }

@@ -38,6 +38,9 @@ public class Member {
   @Column(nullable = false)
   private LocalDateTime regDate;
 
+  @Column
+  private String authKey;
+
   @Enumerated(EnumType.STRING)
   private IsPaidMember isPaidMember;
 
@@ -48,5 +51,16 @@ public class Member {
   private List<Post> posts = new ArrayList<>();
 
   @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-  private List<Reply> replies = new ArrayList<>();
+  private List<Comment> replies = new ArrayList<>();
+
+  @OneToMany(mappedBy = "member")
+  private List<TodoList> todoLists = new ArrayList<>();
+
+  @OneToMany(mappedBy = "member")
+  private List<TodoItem> todoItems = new ArrayList<>();
+
+  @OneToMany(mappedBy = "member")
+  private List<Diary> diaries = new ArrayList<>();
 }
+
+// 📌연관 관계의 주인이 아닌 객체에서 mappedBy 속성을 사용해서 주인을 지정해줘야 하고, 연관관계의 주인은 항상 N
