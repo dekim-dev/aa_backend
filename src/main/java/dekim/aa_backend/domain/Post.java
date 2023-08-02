@@ -1,6 +1,5 @@
 package dekim.aa_backend.domain;
 
-import dekim.aa_backend.constant.BoardCategory;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -20,8 +19,8 @@ public class Post {
   @Column(name = "postNo")
   private Long id;
 
-  @Enumerated(EnumType.STRING)
-  private BoardCategory boardCategory;
+  @Column(nullable = false)
+  private String boardCategory;
 
   @Column(nullable = false, length = 30)
   private String title;
