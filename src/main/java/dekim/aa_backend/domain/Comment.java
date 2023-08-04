@@ -33,8 +33,8 @@ public class Comment {
   private LocalDateTime updatedAt;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "memberNo")
-  private Member member;
+  @JoinColumn(name = "userNo")
+  private User user;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "postNo")

@@ -46,8 +46,8 @@ public class Post {
   private LocalDateTime updatedAt;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "memberNo")
-  private Member member;
+  @JoinColumn(name = "userNo")
+  private User user;
 
   @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   private List<Comment> comments;

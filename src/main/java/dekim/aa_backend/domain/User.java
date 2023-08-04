@@ -16,10 +16,10 @@ import java.util.List;
 @Table(name = "MEMBER_TB") // MEMBER_TB 이름을 가진 테이블과 매핑
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // protected 기본 생성자 생성. Entity는 반드시 기본생성자가 필요
 @AllArgsConstructor // 해당 필드에 쓴 모든 생성자 생성
-public class Member {
+public class User {
   @Id // long타입의 id필드를 키본키로 지정
   @GeneratedValue(strategy = GenerationType.AUTO) // 기본키 증가
-  @Column(name="memberNo")
+  @Column(name="userNo")
   private Long id;
 
   @Column(nullable = false, unique = true, length = 50)
@@ -47,19 +47,19 @@ public class Member {
   @Enumerated(EnumType.STRING)
   private IsActive isActive;
 
-  @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   private List<Post> posts = new ArrayList<>();
 
-  @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   private List<Comment> replies = new ArrayList<>();
 
-  @OneToMany(mappedBy = "member")
+  @OneToMany(mappedBy = "user")
   private List<TodoList> todoLists = new ArrayList<>();
 
-  @OneToMany(mappedBy = "member")
+  @OneToMany(mappedBy = "user")
   private List<TodoItem> todoItems = new ArrayList<>();
 
-  @OneToMany(mappedBy = "member")
+  @OneToMany(mappedBy = "user")
   private List<Diary> diaries = new ArrayList<>();
 }
 

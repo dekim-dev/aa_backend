@@ -8,8 +8,6 @@ import lombok.Setter;
  import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
@@ -30,8 +28,8 @@ public class TodoList {
   private LocalDateTime createdAt;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "memberNo")
-  private Member member;
+  @JoinColumn(name = "userNo")
+  private User user;
 
 //  @OneToMany(mappedBy = "todoItem")
 //  private List<TodoList> todoLists = new ArrayList<>();

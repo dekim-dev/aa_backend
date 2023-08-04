@@ -5,9 +5,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.CreatedDate;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -30,7 +27,7 @@ public class Diary {
   private String conclusion;
 
   @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "memberNo")
-  private Member member;
+  @JoinColumn(name = "userNo")
+  private User user;
 
 }

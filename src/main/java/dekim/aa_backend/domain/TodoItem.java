@@ -39,8 +39,8 @@ public class TodoItem {
   private TodoList todoList;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "memberNo")
-  private Member member;
+  @JoinColumn(name = "userNo")
+  private User user;
 
 
 }
