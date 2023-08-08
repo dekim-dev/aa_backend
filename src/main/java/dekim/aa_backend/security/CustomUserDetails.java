@@ -13,9 +13,17 @@ import java.util.List;
 // UserEntity를 직접적으로 사용하지 않기 위해 사용하는 클래스
 public class CustomUserDetails implements UserDetails {
 
-  private final User user;
+  private User user;
 
   public CustomUserDetails(User user) {
+    this.user = user;
+  }
+
+  public User getUser() {
+    return this.user;
+  }
+
+  public void setUser(User user) {
     this.user = user;
   }
 

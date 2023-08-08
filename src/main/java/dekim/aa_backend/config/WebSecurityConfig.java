@@ -9,13 +9,15 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
 
 @RequiredArgsConstructor
-@Configuration
+@Configuration // 설정파일로 등록
 @EnableWebSecurity
 public class WebSecurityConfig {
 
@@ -23,19 +25,23 @@ public class WebSecurityConfig {
 
   @Bean
   public WebSecurityCustomizer configure() { // SS기능 비활성화
-    return (web -> web.ignoring()
-            .requestMatchers(toH2Console()));
+    return (web) -> web.ignoring()
+            .requestMatchers(toH2Console());
   }
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    return http
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
-                    .requestMatchers("/signin", "/signup").permitAll()
+    http
+            .csrf((csrf) -> csrf.disable())
+            .sessionManagement((session) -> session
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .authorizeHttpRequests(authorize -> authorize
+                    .requestMatchers("/signin", "/signup", "/api/**").permitAll()
                     .anyRequest().authenticated()
             )
-            .build();
+            .formLogin(formLogin -> formLogin.disable());
+    return http.build();
   }
 
   @Bean

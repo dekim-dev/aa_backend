@@ -1,13 +1,17 @@
 package dekim.aa_backend.service;
 
 import dekim.aa_backend.config.jwt.TokenProvider;
+import dekim.aa_backend.dto.TokenDTO;
 import dekim.aa_backend.dto.UserResponseDTO;
+import dekim.aa_backend.entity.RefreshToken;
 import dekim.aa_backend.entity.User;
 import dekim.aa_backend.dto.UserRequestDTO;
 import dekim.aa_backend.exception.EmailAlreadyExistsException;
 import dekim.aa_backend.exception.NicknameAlreadyExistsException;
+import dekim.aa_backend.persistence.RefreshTokenRepository;
 import dekim.aa_backend.persistence.UserRepository;
 import dekim.aa_backend.security.CustomUserDetails;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,6 +21,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.Optional;
+
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -25,7 +31,8 @@ public class UserService {
   private final UserRepository userRepository;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
   private final UserDetailService userDetailService;
-  private final TokenProvider tokenProvider;
+//  private final TokenProvider tokenProvider;
+  private final RefreshTokenRepository refreshTokenRepository;
 
   public UserResponseDTO create(UserRequestDTO dto) {
     // 비어있는 필드 처리
@@ -65,15 +72,23 @@ public class UserService {
   public UserResponseDTO login(UserRequestDTO dto) {
     // Email로 존재하는 회원 찾기
     User user = userRepository.findByEmail(dto.getEmail())
-            .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
+            .orElseThrow(() -> new IllegalArgumentException("Invalid email"));
 
-    // 비밀번호가 match 하지 않을 경우 예외처리. 보안을 위해 이메일과 비밀번호 중 어느 필드가 문제인지 언급 X
+    // 비밀번호가 match 하지 않을 경우 예외처리. 보안을 위해 이메일과 비밀번호 중 어느 필드가 문제인지 언급 X ✨보류 ㅎ
     if (!bCryptPasswordEncoder.matches(dto.getPassword(), user.getPassword())) {
-      throw new IllegalArgumentException("Invalid email or password");
+      throw new IllegalArgumentException("Invalid password");
     }
 
     // 토큰 생성
-    String token = tokenProvider.generateToken(dto, Duration.ofDays(14));
+//    TokenDTO tokenDTO = tokenProvider.makeTokens(dto);
+//    Optional<RefreshToken> refreshToken = refreshTokenRepository.findByUserEmail(dto.getEmail()); // RefreshToken 있는지 확인
+//
+//    if (refreshToken.isPresent()) {
+//      refreshTokenRepository.save(refreshToken.get().updateToken(tokenDTO.getRefreshToken()));
+//    } else {
+//      RefreshToken newToken = new RefreshToken(tokenDTO.getRefreshToken(), dto.getEmail());
+//      refreshTokenRepository.save(newToken);
+//    }
 
     // CustomUserDetails 객체 생성 (User Entity를 직접 사용하지 않기 위해 생성한 클래스)
     CustomUserDetails userDetails = (CustomUserDetails) userDetailService.loadUserByUsername(dto.getEmail());
@@ -81,14 +96,25 @@ public class UserService {
     // 인증 정보 설정
     Authentication authentication = new UsernamePasswordAuthenticationToken(dto, null, userDetails.getAuthorities());
     SecurityContextHolder.getContext().setAuthentication(authentication); // SecurityContextHolder에 저장
-    log.info(dto.getEmail()+ "의 token🔐 " + token);
+//    log.info(dto.getEmail()+ "의 ACEESS_token🔐 " + tokenDTO.getAccessToken());
+//    log.info(dto.getEmail()+ "의 REFRESH_token🔐 " + tokenDTO.getRefreshToken());
 
     // UserResponsDTO로 반환
     return UserResponseDTO.builder()
             .email(user.getEmail())
             .nickname(user.getNickname())
             .role(user.getRole())
-            .token(token)
+//            .token(tokenDTO.getAccessToken())
             .build();
+  }
+
+//  priavte void setHeader(HttpServletResponse response, TokenDTO tokenDTO) {
+//    response.addHeader(JwtUtil);
+//  }
+
+  // 전달받은 유저 ID로 유저를 검색해서 전달하는 메서드
+  public User findById(Long userNo) {
+    return userRepository.findById(userNo)
+            .orElseThrow(() -> new IllegalArgumentException("Unexpected User"));
   }
 }
