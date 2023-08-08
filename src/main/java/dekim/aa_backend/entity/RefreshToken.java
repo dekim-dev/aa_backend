@@ -1,13 +1,13 @@
 package dekim.aa_backend.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
+@Table(name = "REFRESH_TOKEN_TB")
+@AllArgsConstructor
 public class RefreshToken {
 
   @Id
@@ -21,9 +21,9 @@ public class RefreshToken {
   @Column(name = "refreshToken", nullable = false)
   private String refreshToken;
 
-  public RefreshToken(String userEmail, String refreshToken) {
-    this.userEmail = userEmail;
+  public RefreshToken(String refreshToken, String userEmail) {
     this.refreshToken = refreshToken;
+    this.userEmail = userEmail;
   }
 
   public RefreshToken updateToken(String newRefreshToken) {
