@@ -12,6 +12,8 @@ import java.util.List;
 @Getter
 @Setter
 @Table(name = "POST_TB")
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Post {
   @Id
@@ -35,7 +37,7 @@ public class Post {
   private int viewCount;
 
   @Column
-  private String likes;
+  private int likes;
 
   @CreatedDate
   @Column
@@ -46,7 +48,7 @@ public class Post {
   private LocalDateTime updatedAt;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "userNo")
+  @JoinColumn(name = "userNo") // userNo 컬럼을 사용하여 연관 관계 설정
   private User user;
 
   @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL)

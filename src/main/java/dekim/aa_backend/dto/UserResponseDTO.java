@@ -13,4 +13,5 @@ public class UserResponseDTO { // 회원가입 성공 시 반환받는 DTO
   private String nickname;
   private Role role;
   private String accessToken;
+  private String refreshToken;
 }

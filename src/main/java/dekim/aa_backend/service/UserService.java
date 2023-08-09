@@ -23,7 +23,6 @@ public class UserService {
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
   private final UserDetailService userDetailService;
   private final TokenProvider tokenProvider;
-  private final RefreshTokenRepository refreshTokenRepository;
 
   public UserResponseDTO create(UserRequestDTO dto) {
     // 비어있는 필드 처리
@@ -83,6 +82,7 @@ public class UserService {
             .nickname(user.getNickname())
             .role(user.getRole())
             .accessToken(tokenDTO.getAccessToken())
+            .refreshToken(tokenDTO.getRefreshToken())
             .build();
   }
 }

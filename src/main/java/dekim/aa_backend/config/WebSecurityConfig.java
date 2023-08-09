@@ -5,6 +5,7 @@ import dekim.aa_backend.service.UserDetailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -37,11 +38,12 @@ public class WebSecurityConfig {
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authorizeHttpRequests(authorize -> authorize
-                    .requestMatchers("/signin", "/signup", "/api/**").permitAll()
+                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // OPTIONS 요청 허용
+                    .requestMatchers("/signin", "/signup").permitAll()
                     .anyRequest().authenticated()
             )
             .formLogin(formLogin -> formLogin.disable())
-            .addFilterAfter(tokenAuthenticationFilter, CorsFilter.class);
+            .addFilterBefore(tokenAuthenticationFilter, CorsFilter.class);
     return http.build();
   }
 
