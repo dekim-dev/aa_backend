@@ -12,7 +12,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
 @Slf4j
 @RestController
 @RequestMapping("/post")
@@ -32,7 +31,7 @@ public class PostController {
     }
   }
 
-  @PostMapping("/{postId}")
+  @PostMapping("/")
   public ResponseEntity<PostResponseDTO> createPost(
           @AuthenticationPrincipal CustomUserDetails user,
           @RequestBody PostRequestDTO dto

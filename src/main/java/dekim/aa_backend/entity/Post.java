@@ -2,6 +2,7 @@ package dekim.aa_backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -21,7 +22,7 @@ public class Post {
   @Column(name = "postNo")
   private Long id;
 
-  @Column(nullable = false)
+  @Column
   private String boardCategory;
 
   @Column(nullable = false, length = 30)
@@ -39,7 +40,7 @@ public class Post {
   @Column
   private int likes;
 
-  @CreatedDate
+  @CreationTimestamp
   @Column
   private LocalDateTime createdAt;
 
