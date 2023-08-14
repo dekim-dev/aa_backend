@@ -30,8 +30,8 @@ public class TokenProvider { // 사용자 정보를 받아 JWT를 생성하는 �
   private final UserDetailService userDetailService;
   private final RefreshTokenRepository refreshTokenRepository;
 
-  private static final long ACCESS_TIME = 60 * 1000L; // 1분
-  private static final long REFRESH_TIME = 10 * 60 * 1000L; // 2분
+  private static final long ACCESS_TIME = 30 * 60 * 1000L; // 30분
+  private static final long REFRESH_TIME = 24 * 60 * 60 * 1000L; // 1일
   public static final String ACCESS_TOKEN = "ACCESS_TOKEN";
   public static final String REFRESH_TOKEN = "REFRESH_TOKEN";
 
