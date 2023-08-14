@@ -10,11 +10,15 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class Clinic {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   @Column(name = "clinicNo")
   private Long id;
+
+  @Column
+  private String hpid;
 
   @Column
   private String name;
@@ -29,10 +33,10 @@ public class Clinic {
   private String tel;
 
   @Column
-  private String intro;
+  private String info;
 
-  @Column
-  private List<String> schedule;
+  @Column(columnDefinition = "TEXT")
+  private String scheduleJson;
 
   @Column
   private double longitude;
@@ -52,4 +56,16 @@ public class Clinic {
   @OneToMany(mappedBy = "clinic", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   private List<Comment> comments;
 
+  @Builder
+  public Clinic(String hpid, String name, String address, String detailedAddr, String tel, String info,
+                double latitude, double longitude) {
+    this.hpid = hpid;
+    this.name = name;
+    this.address = address;
+    this.detailedAddr = detailedAddr;
+    this.tel = tel;
+    this.info = info;
+    this.latitude = latitude;
+    this.longitude = longitude;
+  }
 }
