@@ -39,7 +39,7 @@ public class WebSecurityConfig {
             )
             .authorizeHttpRequests(authorize -> authorize
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // OPTIONS 요청 허용
-                    .requestMatchers("/signin", "/signup").permitAll()
+                    .requestMatchers("/signin", "/signup", "/clinics/**").permitAll()
                     .anyRequest().authenticated()
             )
             .formLogin(formLogin -> formLogin.disable())
