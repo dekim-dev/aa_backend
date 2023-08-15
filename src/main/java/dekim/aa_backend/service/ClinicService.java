@@ -9,6 +9,8 @@ import dekim.aa_backend.persistence.ClinicRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -152,4 +154,19 @@ public class ClinicService {
       }
     }
   }
+
+
+  /* DB에서 병원 데이터 가져오기 */
+  public Page<Clinic> fetchClinicList(int page, int pageSize) {
+    PageRequest pageRequest = PageRequest.of(page, pageSize);
+    return clinicRepository.findAll(pageRequest);
+  }
+
+
+  /* 키워드로 병원 검색 */
+  public List<Clinic> searchClinicsByKeyword(String keyword, PageRequest of) {
+    return clinicRepository.findByNameContaining(keyword);
+  }
+
+
 }
