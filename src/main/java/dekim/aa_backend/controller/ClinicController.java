@@ -72,5 +72,13 @@ public class ClinicController {
 
     return ResponseEntity.ok(dto);
   }
+
+
+/* 병원 디테일 정보 */
+  @GetMapping("/{id}")
+  public ResponseEntity<?> getClinicInfoById(@PathVariable Long id) {
+    Optional<Clinic> clinic = clinicService.getClinicInfoById(id);
+    return ResponseEntity.ok(clinic);
+  }
 }
 

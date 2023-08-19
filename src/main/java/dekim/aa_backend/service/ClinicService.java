@@ -167,4 +167,9 @@ public class ClinicService {
   }
 
 
+  /* id로 병원 정보 가져오기 */
+  public Optional<Clinic> getClinicInfoById(Long id) {
+    return clinicRepository.findById(id);
+  }
+
 }
