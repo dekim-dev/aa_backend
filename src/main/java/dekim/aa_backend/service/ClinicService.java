@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -20,10 +21,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -164,8 +162,8 @@ public class ClinicService {
 
 
   /* 키워드로 병원 검색 */
-  public List<Clinic> searchClinicsByKeyword(String keyword, PageRequest of) {
-    return clinicRepository.findByNameContaining(keyword);
+  public Page<Clinic> searchClinicsByKeyword(String keyword, Pageable pageable) {
+    return clinicRepository.findByNameContaining(keyword, pageable);
   }
 
 
