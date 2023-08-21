@@ -80,5 +80,22 @@ public class ClinicController {
     Optional<Clinic> clinic = clinicService.getClinicInfoById(id);
     return ResponseEntity.ok(clinic);
   }
+
+
+  /* 주소로 병원 검색 */
+  @GetMapping("/searchAddress")
+  public ResponseEntity<?> searchClinicsByAddress(
+          @RequestParam String address,
+          @RequestParam(defaultValue = "0") int page,
+          @RequestParam(defaultValue = "10") int pageSize
+  ) {
+    Page<Clinic> clinics = clinicService.searchClinicsByAddress(address, PageRequest.of(page, pageSize));
+
+    ClinicSearchResponseDTO dto = new ClinicSearchResponseDTO();
+    dto.setClinics(clinics.getContent());
+    dto.setTotalResults(clinics.getTotalElements());
+
+    return ResponseEntity.ok(dto);
+  }
 }
 

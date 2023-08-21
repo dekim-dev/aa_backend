@@ -14,5 +14,6 @@ public interface ClinicRepository extends JpaRepository<Clinic, Long> {
 
   boolean existsByHpid(String hpid);
   Page<Clinic> findByNameContaining(String keyword, Pageable pageable);
+  Page<Clinic> findByAddressContaining(String address, Pageable pageable);
   Optional<Clinic> findById(Long id);
 }

@@ -172,4 +172,10 @@ public class ClinicService {
     return clinicRepository.findById(id);
   }
 
+
+  /* 키워드로 병원 검색 */
+  public Page<Clinic> searchClinicsByAddress(String address, Pageable pageable) {
+    return clinicRepository.findByAddressContaining(address, pageable);
+  }
+
 }
