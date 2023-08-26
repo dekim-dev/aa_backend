@@ -39,8 +39,9 @@ public class WebSecurityConfig {
             )
             .authorizeHttpRequests(authorize -> authorize
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // OPTIONS 요청 허용
-                    .requestMatchers("/signin", "/signup", "/clinics/**").permitAll()
-                    .anyRequest().authenticated()
+//                    .requestMatchers("/signin", "/signup", "/clinics/**", "/todo-item").permitAll()
+//                    .anyRequest().authenticated()
+                            .anyRequest().permitAll()
             )
             .formLogin(formLogin -> formLogin.disable())
             .addFilterBefore(tokenAuthenticationFilter, CorsFilter.class);
