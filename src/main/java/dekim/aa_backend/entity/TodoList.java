@@ -1,19 +1,20 @@
 package dekim.aa_backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
- import org.springframework.data.annotation.CreatedDate;
+import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
 @Setter
 @Table(name = "TODO_LIST_TB")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@RequiredArgsConstructor
+//@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TodoList {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
@@ -31,8 +32,16 @@ public class TodoList {
   @JoinColumn(name = "userNo")
   private User user;
 
-//  @OneToMany(mappedBy = "todoItem")
-//  private List<TodoList> todoLists = new ArrayList<>();
+  @OneToMany(mappedBy = "todoList")
+  @JsonIgnore
+  private List<TodoItem> todoItems = new ArrayList<>();
 
-
+  @Builder
+  public TodoList(Long id, String listName, LocalDateTime createdAt, User user, List<TodoItem> todoItems) {
+    this.id = id;
+    this.listName = listName;
+    this.createdAt = createdAt;
+    this.user = user;
+    this.todoItems = todoItems;
+  }
 }

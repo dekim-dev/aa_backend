@@ -1,11 +1,14 @@
 package dekim.aa_backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import dekim.aa_backend.constant.TimeOfDay;
 import dekim.aa_backend.constant.TodoItemStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.Builder;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
@@ -18,7 +21,7 @@ import java.time.LocalDateTime;
 public class TodoItem {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  @Column(name = "ItemNo")
+  @Column(name = "itemNo")
   private Long id;
 
   @Column(nullable = false)
@@ -26,6 +29,9 @@ public class TodoItem {
 
   @Enumerated(EnumType.STRING)
   private TodoItemStatus todoItemStatus;
+
+  @Enumerated(EnumType.STRING)
+  private TimeOfDay timeOfDay;
 
   @Column
   private int priority;
@@ -36,11 +42,23 @@ public class TodoItem {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "listNo")
+  @JsonIgnore
   private TodoList todoList;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "userNo")
   private User user;
 
-
+  // 빌더 추가
+  @Builder
+  public TodoItem(String itemName, TodoItemStatus todoItemStatus, TimeOfDay timeOfDay, int priority, LocalDateTime createdAt, TodoList todoList, User user) {
+    this.itemName = itemName;
+    this.todoItemStatus = todoItemStatus;
+    this.timeOfDay = timeOfDay;
+    this.priority = priority;
+    this.createdAt = createdAt;
+    this.todoList = todoList;
+    this.user = user;
+  }
 }
+
