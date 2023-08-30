@@ -1,13 +1,11 @@
 package dekim.aa_backend.service;
 
-import dekim.aa_backend.dto.GlobalResponseDTO;
 import dekim.aa_backend.dto.PostRequestDTO;
 import dekim.aa_backend.dto.PostResponseDTO;
 import dekim.aa_backend.entity.Post;
 import dekim.aa_backend.entity.User;
 import dekim.aa_backend.persistence.PostRepository;
 import dekim.aa_backend.persistence.UserRepository;
-import dekim.aa_backend.security.CustomUserDetails;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +39,7 @@ public class PostService {
       return PostResponseDTO.builder()
               .nickname(user.getNickname())
               .boardCategory(post.getBoardCategory())
+              .topic(post.getTopic())
               .title(post.getTitle())
               .content(post.getContent())
               .createdAt(post.getCreatedAt())
@@ -59,6 +58,7 @@ public class PostService {
     // Post 엔티티 생성 및 닉네임 및 사용자 정보 설정
     Post post = Post.builder()
             .boardCategory(postRequestDTO.getBoardCategory())
+            .topic(postRequestDTO.getTopic())
             .title(postRequestDTO.getTitle())
             .content(postRequestDTO.getContent())
             .user(currentUser) // 사용자 정보 설정
@@ -66,10 +66,12 @@ public class PostService {
 
     postRepository.save(post);
     return PostResponseDTO.builder()
+            .id(post.getId())
             .boardCategory(post.getBoardCategory())
+            .topic(post.getTopic())
             .title(post.getTitle())
             .content(post.getContent())
-            .nickname(postRequestDTO.getNickname())
+            .nickname(post.getUser().getNickname())
             .build();
   }
 

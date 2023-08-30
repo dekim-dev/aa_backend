@@ -7,7 +7,6 @@ import dekim.aa_backend.entity.User;
 import dekim.aa_backend.dto.UserRequestDTO;
 import dekim.aa_backend.exception.EmailAlreadyExistsException;
 import dekim.aa_backend.exception.NicknameAlreadyExistsException;
-import dekim.aa_backend.persistence.RefreshTokenRepository;
 import dekim.aa_backend.persistence.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

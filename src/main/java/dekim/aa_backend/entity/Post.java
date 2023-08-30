@@ -3,7 +3,6 @@ package dekim.aa_backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
@@ -24,6 +23,9 @@ public class Post {
 
   @Column
   private String boardCategory;
+
+  @Column
+  private String topic;
 
   @Column(nullable = false, length = 30)
   private String title;

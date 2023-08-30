@@ -1,7 +1,6 @@
 package dekim.aa_backend.service;
 
 import dekim.aa_backend.config.jwt.TokenProvider;
-import dekim.aa_backend.dto.UserRequestDTO;
 import dekim.aa_backend.entity.User;
 import dekim.aa_backend.persistence.RefreshTokenRepository;
 import dekim.aa_backend.persistence.UserRepository;

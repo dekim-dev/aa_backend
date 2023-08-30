@@ -1,7 +1,6 @@
 package dekim.aa_backend.dto;
 
 import dekim.aa_backend.entity.Comment;
-import dekim.aa_backend.entity.User;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -15,6 +14,7 @@ import java.util.List;
 public class PostResponseDTO {
   private Long id;
   private String boardCategory;
+  private String topic;
   private String title;
   private String content;
   private String imgUrl;
