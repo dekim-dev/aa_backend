@@ -48,16 +48,35 @@ public class PostController {
   }
 
   @GetMapping("/category/{boardCategory}")
-  public ResponseEntity<Page<Post>> getPostsByBoardCategory(@RequestParam(defaultValue = "0") int page,
-                                                            @RequestParam(defaultValue = "10") int pageSize,
-                                                            @PathVariable String boardCategory) {
+  public ResponseEntity<Page<PostResponseDTO>> getPostsByBoardCategory(@RequestParam(defaultValue = "0") int page,
+                                                                       @RequestParam(defaultValue = "10") int pageSize,
+                                                                       @PathVariable String boardCategory) {
     try {
       Page<Post> postPage = postService.fetchPostsByBoardCategory(page, pageSize, boardCategory);
-      log.info("🍒성공" + postPage.toString());
-      return ResponseEntity.ok(postPage);
+      Page<PostResponseDTO> postResponsePage = postPage.map(this::convertToDTO);
+      log.info("🎈성공: " + postResponsePage);
+      return ResponseEntity.ok(postResponsePage);
     } catch (Exception e) {
-      log.warn("👉🏻에러" + e);
+      log.warn("🧨에러: " + e);
       return ResponseEntity.badRequest().build();
     }
   }
+
+  private PostResponseDTO convertToDTO(Post post) {
+    return PostResponseDTO.builder()
+            .id(post.getId())
+            .boardCategory(post.getBoardCategory())
+            .topic(post.getTopic())
+            .title(post.getTitle())
+            .content(post.getContent())
+            .imgUrl(post.getImgUrl())
+            .viewCount(post.getViewCount())
+            .likes(post.getLikes())
+            .createdAt(post.getCreatedAt())
+            .updatedAt(post.getUpdatedAt())
+            .nickname(post.getUser().getNickname())
+            .comments(post.getComments())
+            .build();
+  }
+
 }
