@@ -24,11 +24,11 @@ public class WebSecurityConfig {
   private final UserDetailService userService;
   private final TokenAuthenticationFilter tokenAuthenticationFilter;
 
-  @Bean
-  public WebSecurityCustomizer configure() { // SS기능 비활성화
-    return (web) -> web.ignoring()
-            .requestMatchers(toH2Console());
-  }
+//  @Bean
+//  public WebSecurityCustomizer configure() { // SS기능 비활성화
+//    return (web) -> web.ignoring()
+//            .requestMatchers(toH2Console());
+//  }
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {

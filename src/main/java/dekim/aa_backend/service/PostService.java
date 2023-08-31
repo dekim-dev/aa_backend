@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -90,9 +91,27 @@ public class PostService {
     }
   }
 
-  public Page<Post> fetchPostsByBoardCategory(int page, int pageSize, String boardCategory) {
-    PageRequest pageRequest = PageRequest.of(page, pageSize);
-    return postRepository.findByBoardCategory(boardCategory, pageRequest);
+  public Page<PostResponseDTO> fetchPostsByBoardCategory(int page, int pageSize, String boardCategory) {
+    PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+    Page<Post> postPage = postRepository.findByBoardCategory(boardCategory, pageRequest);
+    return postPage.map(this::convertToDTO);
+  }
+
+  private PostResponseDTO convertToDTO(Post post) {
+    return PostResponseDTO.builder()
+            .id(post.getId())
+            .boardCategory(post.getBoardCategory())
+            .topic(post.getTopic())
+            .title(post.getTitle())
+            .content(post.getContent())
+            .imgUrl(post.getImgUrl())
+            .viewCount(post.getViewCount())
+            .likes(post.getLikes())
+            .createdAt(post.getCreatedAt())
+            .updatedAt(post.getUpdatedAt())
+            .nickname(post.getUser().getNickname())
+            .comments(post.getComments())
+            .build();
   }
 
 
