@@ -7,8 +7,10 @@ import dekim.aa_backend.security.CustomUserDetails;
 import dekim.aa_backend.service.PostService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -45,4 +47,17 @@ public class PostController {
     }
   }
 
+  @GetMapping("/category/{boardCategory}")
+  public ResponseEntity<Page<Post>> getPostsByBoardCategory(@RequestParam(defaultValue = "0") int page,
+                                                            @RequestParam(defaultValue = "10") int pageSize,
+                                                            @PathVariable String boardCategory) {
+    try {
+      Page<Post> postPage = postService.fetchPostsByBoardCategory(page, pageSize, boardCategory);
+      log.info("🍒성공" + postPage.toString());
+      return ResponseEntity.ok(postPage);
+    } catch (Exception e) {
+      log.warn("👉🏻에러" + e);
+      return ResponseEntity.badRequest().build();
+    }
+  }
 }
