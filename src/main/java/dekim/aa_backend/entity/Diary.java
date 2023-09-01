@@ -1,16 +1,19 @@
 package dekim.aa_backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
 @Table(name = "DIARY_TB")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EntityListeners(AuditingEntityListener.class)
 public class Diary {
   @Id
   @Column(name = "diaryNo")
@@ -26,8 +29,13 @@ public class Diary {
   @Column(nullable = false)
   private String conclusion;
 
-  @OneToOne(fetch = FetchType.LAZY)
+  @CreatedDate
+  @Column
+  private LocalDateTime createdAt;
+
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "userNo")
+  @JsonIgnore
   private User user;
 
 }
