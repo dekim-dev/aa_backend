@@ -14,7 +14,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -54,10 +53,19 @@ public class PostService {
   }
 
 
-  public PostResponseDTO writePost(PostRequestDTO postRequestDTO, User user) {
-    // 사용자 엔티티(User)에서 닉네임 가져오기
-    User currentUser = userRepository.findById(user.getId()).orElseThrow(() -> new RuntimeException("User not found"));
-    String nickname = currentUser.getNickname();
+  public PostResponseDTO writePost(PostRequestDTO postRequestDTO, Long userId) {
+
+    // 1. 현재 인증 정보 가져오기
+//    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//    log.info("authenticatioin: " + authentication);
+
+    // 2. 사용자 아이디를 통해 사용자 정보 조회
+    Optional<User> userOptional = userRepository.findById(userId);
+    if (!userOptional.isPresent()) {
+      throw new RuntimeException("User not found");
+    }
+
+    User user = userOptional.get();
 
     // Post 엔티티 생성 및 닉네임 및 사용자 정보 설정
     Post post = Post.builder()
@@ -65,7 +73,7 @@ public class PostService {
             .topic(postRequestDTO.getTopic())
             .title(postRequestDTO.getTitle())
             .content(postRequestDTO.getContent())
-            .user(currentUser) // 사용자 정보 설정
+            .user(user)
             .build();
 
     postRepository.save(post);
@@ -113,8 +121,6 @@ public class PostService {
             .comments(post.getComments())
             .build();
   }
-
-
 }
 
 
