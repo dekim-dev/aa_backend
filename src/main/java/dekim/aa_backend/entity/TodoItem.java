@@ -9,8 +9,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.Builder;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.annotation.CreatedDate;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -38,7 +40,7 @@ public class TodoItem {
 
   @CreatedDate
   @Column
-  private LocalDateTime createdAt;
+  private LocalDate createdAt;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "listNo")
@@ -47,11 +49,12 @@ public class TodoItem {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "userNo")
+  @JsonIgnore
   private User user;
 
   // 빌더 추가
   @Builder
-  public TodoItem(String itemName, TodoItemStatus todoItemStatus, TimeOfDay timeOfDay, int priority, LocalDateTime createdAt, TodoList todoList, User user) {
+  public TodoItem(String itemName, TodoItemStatus todoItemStatus, TimeOfDay timeOfDay, int priority, LocalDate createdAt, TodoList todoList, User user) {
     this.itemName = itemName;
     this.todoItemStatus = todoItemStatus;
     this.timeOfDay = timeOfDay;

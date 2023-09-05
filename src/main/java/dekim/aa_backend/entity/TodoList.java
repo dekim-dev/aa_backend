@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,7 @@ public class TodoList {
 
   @CreatedDate
   @Column
-  private LocalDateTime createdAt;
+  private LocalDate createdAt;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "userNo")
@@ -37,7 +38,7 @@ public class TodoList {
   private List<TodoItem> todoItems = new ArrayList<>();
 
   @Builder
-  public TodoList(Long id, String listName, LocalDateTime createdAt, User user, List<TodoItem> todoItems) {
+  public TodoList(Long id, String listName, LocalDate createdAt, User user, List<TodoItem> todoItems) {
     this.id = id;
     this.listName = listName;
     this.createdAt = createdAt;

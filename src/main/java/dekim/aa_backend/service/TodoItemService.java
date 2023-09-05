@@ -4,17 +4,21 @@ import dekim.aa_backend.constant.TodoItemStatus;
 import dekim.aa_backend.dto.TodoItemDTO;
 import dekim.aa_backend.entity.TodoItem;
 import dekim.aa_backend.entity.TodoList;
+import dekim.aa_backend.entity.User;
 import dekim.aa_backend.persistence.TodoItemRepository;
 import dekim.aa_backend.persistence.TodoListRepository;
+import dekim.aa_backend.persistence.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,10 +30,21 @@ public class TodoItemService {
   @Autowired
   private TodoItemRepository todoItemRepository;
 
+  @Autowired
+  private UserRepository userRepository;
+
   @Transactional
-  public TodoItem createTodoItem(TodoItemDTO todoItemDTO) {
-    LocalDateTime createdAt = todoItemDTO.getCreatedAt();
-    String listName = createdAt.format(DateTimeFormatter.ofPattern("yyMMdd"));
+  public TodoItem createTodoItem(TodoItemDTO todoItemDTO, Long userId) {
+
+    Optional<User> userOptional = userRepository.findById(userId);
+    if (!userOptional.isPresent()) {
+      throw new RuntimeException("User not found");
+    }
+
+    User user = userOptional.get();
+
+    LocalDate createdAt = todoItemDTO.getCreatedAt();
+    String listName = user.getId() + createdAt.format(DateTimeFormatter.ofPattern("yyMMdd"));
 
     // TodoItemDTO를 TodoItem 엔티티로 변환하면서 빌더 활용
     TodoItem todoItem = TodoItem.builder()
@@ -38,6 +53,7 @@ public class TodoItemService {
             .timeOfDay(todoItemDTO.getTimeOfDay())
             .priority(todoItemDTO.getPriority())
             .createdAt(todoItemDTO.getCreatedAt())
+            .user(user)
             .build();
 
     // TodoListRepository를 사용하여 리스트 조회 또는 생성
@@ -48,6 +64,7 @@ public class TodoItemService {
       TodoList newList = new TodoList();
       newList.setListName(listName);
       newList.setCreatedAt(createdAt);
+      newList.setUser(user);
 
       TodoList savedList = todoListRepository.save(newList);
       todoItem.setTodoList(savedList); // 새로운 리스트 할당
@@ -58,8 +75,16 @@ public class TodoItemService {
     return todoItem;
   }
 
-  public List<TodoItemDTO> getTodoItemsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
-    List<TodoItem> todoItems = todoItemRepository.findByCreatedAtBetween(startDate, endDate);
+
+  public List<TodoItemDTO> getTodoItemsByDate(LocalDate date, Long userId) {
+    // 사용자의 정보 확인
+    Optional<User> userOptional = userRepository.findById(userId);
+    if (!userOptional.isPresent()) {
+      throw new RuntimeException("User not found");
+    }
+    User user = userOptional.get();
+
+    List<TodoItem> todoItems = todoItemRepository.findByUserAndCreatedAt(user, date);
     return todoItems.stream()
             .map(this::convertToDto)
             .collect(Collectors.toList());
@@ -76,12 +101,22 @@ public class TodoItemService {
     return dto;
   }
 
-  public void deleteTodoItemById(Long itemId) {
-    todoItemRepository.deleteById(itemId);
+
+  public void deleteTodoItemById(Long itemId, Long userId) {
+    Optional<TodoItem> optionalTodoItem = todoItemRepository.findById(itemId);
+
+    if (optionalTodoItem.isPresent()) {
+      TodoItem todoItem = optionalTodoItem.get();
+
+      if (todoItem.getUser().getId().equals(userId)) {
+        todoItemRepository.deleteById(itemId);
+      }
+    }
   }
 
+
   @Transactional
-  public void updateTodoItemStatusToDone(Long itemId) {
+  public void updateTodoItemStatusToDone(Long itemId, Long userId) {
     try {
       TodoItem todoItem = todoItemRepository.findById(itemId)
                       .orElseThrow(() -> new EntityNotFoundException("Todo item not found"));
@@ -90,8 +125,9 @@ public class TodoItemService {
               ? TodoItemStatus.NOT_STARTED
               : TodoItemStatus.DONE;
 
-      todoItem.setTodoItemStatus(newStatus);
-      todoItemRepository.save(todoItem);
+        if (todoItem.getUser().getId().equals(userId)) {
+          todoItem.setTodoItemStatus(newStatus);
+          todoItemRepository.save(todoItem);        }
 
     } catch (NoSuchElementException e) {
       throw new RuntimeException("Todo item not found", e);

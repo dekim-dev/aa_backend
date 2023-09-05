@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 @Getter
 @Setter
 public class TodoItemDTO {
@@ -19,7 +19,7 @@ public class TodoItemDTO {
 
   private TimeOfDay timeOfDay;
 
-  private LocalDateTime createdAt;
+  private LocalDate createdAt;
 
   private int priority;
 }
