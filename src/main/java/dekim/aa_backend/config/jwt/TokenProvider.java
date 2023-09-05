@@ -1,68 +1,137 @@
 package dekim.aa_backend.config.jwt;
 
 import dekim.aa_backend.dto.TokenDTO;
-import dekim.aa_backend.dto.UserRequestDTO;
-import dekim.aa_backend.entity.RefreshToken;
-import dekim.aa_backend.persistence.RefreshTokenRepository;
-import dekim.aa_backend.security.CustomUserDetails;
-import dekim.aa_backend.service.UserDetailService;
 import io.jsonwebtoken.*;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SecurityException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
+import java.security.Key;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
-@RequiredArgsConstructor
-@Service
+@Component
 public class TokenProvider { // 사용자 정보를 받아 JWT를 생성하는 클래스
-  private final JwtProperties jwtProperties;
-  private final UserDetailService userDetailService;
-  private final RefreshTokenRepository refreshTokenRepository;
 
-  private static final long ACCESS_TIME = 30 * 60 * 1000L; // 30분
-  private static final long REFRESH_TIME = 24 * 60 * 60 * 1000L; // 1일
-  public static final String ACCESS_TOKEN = "ACCESS_TOKEN";
-  public static final String REFRESH_TOKEN = "REFRESH_TOKEN";
+  private static final String AUTHORITIES_KEY = "auth";
+  private static final String BEARER_TYPE = "Bearer";
+  private static final long ACCESS_TOKEN_EXPIRE_TIME = 100 * 60 * 30;           // 3분
+  private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 7; // 7일
 
-  // header 토큰을 가져오는 기능
-  public String getHeaderToken(HttpServletRequest request, String type) {
-    return type.equals("ACCESS") ? request.getHeader(ACCESS_TOKEN) : request.getHeader(REFRESH_TOKEN);
+  private final Key key;
+  public TokenProvider(@Value("${jwt.secret_key}") String secretKey) {
+    byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+    this.key = Keys.hmacShaKeyFor(keyBytes);
   }
 
-  // 토큰 생성
-  public TokenDTO makeTokens(UserRequestDTO user) {
-    return new TokenDTO(createToken(user, "ACCESS"), createToken(user, "REFRESH"));
-  }
-  public String createToken(UserRequestDTO user, String type) {
-    Date now = new Date();
-    long time = type.equals("ACCESS") ? ACCESS_TIME : REFRESH_TIME;
+  /** AccessToken, RefreshToken 생성*/
+  public TokenDTO generateTokenDto(Authentication authentication) {
+    // 권한들 가져오기
+    String authorities = authentication.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .collect(Collectors.joining(","));
+    log.info("✨✨authentication: " + authentication);
+    log.info("🍒authorities: " + authorities.toString());
 
-    return Jwts.builder()
-            .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
-            .setIssuer(jwtProperties.getIssuer())
-            .setIssuedAt(now)
-            .setExpiration(new Date(now.getTime() + time))
-            .setSubject(user.getEmail())
-            .signWith(SignatureAlgorithm.HS256, jwtProperties.getSecretKey())
+    long now = (new Date()).getTime();
+
+    // Access Token 생성
+    Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
+    String accessToken = Jwts.builder()
+            .setSubject(authentication.getName())
+            .claim(AUTHORITIES_KEY, authorities)
+            .setExpiration(accessTokenExpiresIn)
+            .signWith(key, SignatureAlgorithm.HS512)
             .compact();
+
+    // Refresh Token 생성
+    Date refreshTokenExpiresIn = new Date(now + REFRESH_TOKEN_EXPIRE_TIME);
+    String refreshToken = Jwts.builder()
+            .setExpiration(refreshTokenExpiresIn)
+            .signWith(key, SignatureAlgorithm.HS512)
+            .compact();
+
+
+    return TokenDTO.builder()
+            .grantType(BEARER_TYPE)
+            .accessToken(accessToken)
+            .accessTokenExpiresIn(accessTokenExpiresIn.getTime())
+            .refreshToken(refreshToken)
+            .refreshTokenExpiresIn(refreshTokenExpiresIn.getTime())
+            .authority(authorities)
+            .build();
   }
 
-  public boolean validToken(String token) {
+  /** AccessToken 재발급 */
+  public TokenDTO generateAccessToken(Authentication authentication) {
+    // 권한들 가져오기
+    String authorities = authentication.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .collect(Collectors.joining(","));
+    log.info("✨✨authentication: " + authentication);
+
+    long now = (new Date()).getTime();
+
+    // Access Token 재발급
+    Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
+    String accessToken = Jwts.builder()
+            .setSubject(authentication.getName())
+            .claim(AUTHORITIES_KEY, authorities)
+            .setExpiration(accessTokenExpiresIn)
+            .signWith(key, SignatureAlgorithm.HS512)
+            .compact();
+
+    return TokenDTO.builder()
+            .grantType(BEARER_TYPE)
+            .accessToken(accessToken)
+            .accessTokenExpiresIn(accessTokenExpiresIn.getTime())
+            .authority(authorities)
+            .build();
+  }
+
+  public Authentication getAuthentication(String accessToken) {
+    // 토큰 복호화
+    Claims claims = parseClaims(accessToken);
+    log.info("🍒claims: " + claims);
+
+    if (claims.get(AUTHORITIES_KEY) == null) {
+      throw new RuntimeException("권한 정보가 없는 토큰입니다.");
+    }
+
+    // 클레임에서 권한 정보 가져오기
+    Collection<? extends GrantedAuthority> authorities =
+            Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
+                    .map(SimpleGrantedAuthority::new)
+                    .collect(Collectors.toList());
+    log.info("🍒authorities: " + authorities.toString());
+
+
+    // UserDetails 객체를 만들어서 Authentication 리턴
+    UserDetails principal = new User(claims.getSubject(), "", authorities);
+    log.info("🍒principal: " + principal);
+
+
+    return new UsernamePasswordAuthenticationToken(principal, "", authorities);
+  }
+
+  public boolean validateToken(String token) {
     try {
-      Jwts.parserBuilder().setSigningKey(jwtProperties.getSecretKey()).build().parseClaimsJws(token);
+      Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
       return true;
-    } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
+    } catch (SecurityException | MalformedJwtException e) {
       log.info("잘못된 JWT 서명입니다.");
     } catch (ExpiredJwtException e) {
       log.info("만료된 JWT 토큰입니다.");
@@ -74,67 +143,12 @@ public class TokenProvider { // 사용자 정보를 받아 JWT를 생성하는 �
     return false;
   }
 
-  // refreshToken 검증
-  public Boolean refreshTokenValidation(String token) {
-    if(!validToken(token)) return false;
-    Optional<RefreshToken> refreshToken = refreshTokenRepository.findByUserEmail(getEmailFromToken(token));
-    return refreshToken.isPresent() && token.equals(refreshToken.get().getRefreshToken());
-  }
-
-  public void saveOrUpdateRefreshToken(String userEmail, String refreshToken) {
-    Optional<RefreshToken> existingToken = refreshTokenRepository.findByUserEmail(userEmail);
-    if (existingToken.isPresent()) {
-      existingToken.get().updateToken(refreshToken);
-      refreshTokenRepository.save(existingToken.get());
-    } else {
-      RefreshToken newToken = new RefreshToken(refreshToken, userEmail);
-      refreshTokenRepository.save(newToken);
+  private Claims parseClaims(String accessToken) {
+    try {
+      return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody();
+    } catch (ExpiredJwtException e) {
+      return e.getClaims();
     }
-  }
-
-  // 인증 객체 생성
-  public Authentication createAuthentication(String email) {
-    UserDetails userDetails = userDetailService.loadUserByUsername(email);
-    return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
-  }
-
-  // 토큰에서 email 가져오는 기능
-  public String getEmailFromToken(String token) {
-    return Jwts.parserBuilder().setSigningKey(jwtProperties.getSecretKey()).build().parseClaimsJws(token).getBody().getSubject();
-  }
-
-  // ACCESS TOKEN 헤더 설정
-  public void setHeaderAccessToken(HttpServletResponse response, String accessToken) {
-    response.setHeader("ACCESS_TOKEN", accessToken);
-  }
-
-  // REFRESH TOKEN 헤더 설정
-  public void setHeaderRefreshToken(HttpServletResponse response, String refreshToken) {
-    response.setHeader("REFRESH_TOKEN", refreshToken);
-  }
-
-  public Authentication getAuthentication(String token) {
-    String userEmail = getEmailFromToken(token);
-    CustomUserDetails userDetails = (CustomUserDetails) userDetailService.loadUserByUsername(userEmail);
-
-    if (userDetails == null) {
-      throw new UsernameNotFoundException("User not found for the given email");
-    }
-    return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
-  }
-
-  public String createAToken(Authentication authentication, String type) {
-    Date now = new Date();
-    long time = type.equals("ACCESS") ? ACCESS_TIME : REFRESH_TIME;
-
-    return Jwts.builder()
-            .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
-            .setIssuer(jwtProperties.getIssuer())
-            .setIssuedAt(now)
-            .setExpiration(new Date(now.getTime() + time))
-            .setSubject(authentication.getName())
-            .signWith(SignatureAlgorithm.HS256, jwtProperties.getSecretKey())
-            .compact();
   }
 }
 
