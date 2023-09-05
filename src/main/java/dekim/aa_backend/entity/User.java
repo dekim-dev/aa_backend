@@ -1,8 +1,8 @@
 package dekim.aa_backend.entity;
 
+import dekim.aa_backend.constant.Authority;
 import dekim.aa_backend.constant.IsActive;
 import dekim.aa_backend.constant.IsPaidMember;
-import dekim.aa_backend.constant.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -49,14 +49,16 @@ public class User {
   private IsActive isActive;
 
   @Enumerated(EnumType.STRING)
-  private Role role;
+  private Authority authority;
+
+
 
   @Builder
-  public User(String email, String password, String nickname) {
+  public User(String email, String password, String nickname, Authority authority) {
     this.email = email;
     this.password = password;
     this.nickname = nickname;
-    this.role = Role.USER;
+    this.authority = authority;
     this.isActive = IsActive.INACTIVE;
     this.isPaidMember = IsPaidMember.UNPAID;
   }
