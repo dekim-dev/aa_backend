@@ -7,27 +7,28 @@ import lombok.*;
 @Getter
 @Entity
 @Table(name = "REFRESH_TOKEN_TB")
-@AllArgsConstructor
 public class RefreshToken {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "id", updatable = false)
-  private Long id;
+  @Column(name = "`key`")
+  private String key;
 
-  @Column(name = "userEmail", nullable = false, unique = true)
-  private String userEmail;
+  @Column(name = "`value`")
+  private String value;
 
-  @Column(name = "refreshToken", nullable = false)
-  private String refreshToken;
+  private Long expiresIn;
 
-  public RefreshToken(String refreshToken, String userEmail) {
-    this.refreshToken = refreshToken;
-    this.userEmail = userEmail;
+
+  @Builder
+  public RefreshToken(String key, String value, Long expiresIn) {
+    this.key = key;
+    this.value = value;
+    this.expiresIn = expiresIn;
   }
 
-  public RefreshToken updateToken(String newRefreshToken) {
-    this.refreshToken = newRefreshToken;
+  public RefreshToken updateValue(String token) {
+    this.value = token;
     return this;
   }
+
 }
