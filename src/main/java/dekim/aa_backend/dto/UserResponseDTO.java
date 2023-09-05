@@ -1,17 +1,18 @@
 package dekim.aa_backend.dto;
 
-import dekim.aa_backend.constant.Role;
+import dekim.aa_backend.entity.User;
 import lombok.*;
 
 @Getter
-@Setter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserResponseDTO { // 회원가입 성공 시 반환받는 DTO
+public class UserResponseDTO {
   private String email;
-  private String nickname;
-  private Role role;
-  private String accessToken;
-  private String refreshToken;
+
+  public static UserResponseDTO of(User user) {
+    return new UserResponseDTO(user.getEmail());
+  }
 }
+
+// of : 주로 데이터 변환 또는 매핑을 위해 사용되는 메소드
+//      위 코드에서는 User 엔티티를 UserResponseDTO로 변환
