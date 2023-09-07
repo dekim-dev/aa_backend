@@ -23,5 +23,7 @@ public class PostResponseDTO {
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
   private String nickname;
+  private Long userId;
+  private String pfImg;
   private List<Comment> comments;
 }

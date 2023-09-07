@@ -39,14 +39,8 @@ public class PostService {
       User user = userRepository.findById(userNo)
               .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-      return PostResponseDTO.builder()
-              .nickname(user.getNickname())
-              .boardCategory(post.getBoardCategory())
-              .topic(post.getTopic())
-              .title(post.getTitle())
-              .content(post.getContent())
-              .createdAt(post.getCreatedAt())
-              .build();
+      return convertToDTO(post);
+
     } else {
       throw new EntityNotFoundException("Post not found");
     }
@@ -77,14 +71,7 @@ public class PostService {
             .build();
 
     postRepository.save(post);
-    return PostResponseDTO.builder()
-            .id(post.getId())
-            .boardCategory(post.getBoardCategory())
-            .topic(post.getTopic())
-            .title(post.getTitle())
-            .content(post.getContent())
-            .nickname(post.getUser().getNickname())
-            .build();
+    return convertToDTO(post);
   }
 
 
@@ -118,9 +105,54 @@ public class PostService {
             .createdAt(post.getCreatedAt())
             .updatedAt(post.getUpdatedAt())
             .nickname(post.getUser().getNickname())
+            .userId(post.getUser().getId())
+            .pfImg(post.getUser().getPfImg())
             .comments(post.getComments())
             .build();
   }
-}
 
+    public PostResponseDTO updatePostById(PostRequestDTO postRequestDTO, Long userId) {
+      // 사용자 확인
+      User user = userRepository.findById(userId)
+              .orElseThrow(() -> new RuntimeException("User not found"));
+
+      // 게시물 확인
+      Post post = postRepository.findById(postRequestDTO.getId())
+              .orElseThrow(() -> new RuntimeException("Post not found"));
+
+      // 사용자의 권한 확인 (예: 사용자 ID를 사용)
+      if (!user.getId().equals(post.getUser().getId())) {
+        throw new RuntimeException("해당 게시글의 작성자가 아님");
+      }
+
+      // 게시물 업데이트
+      post.setBoardCategory(postRequestDTO.getBoardCategory());
+      post.setTopic(postRequestDTO.getTopic());
+      post.setTitle(postRequestDTO.getTitle());
+      post.setContent(postRequestDTO.getContent());
+      post.setUpdatedAt(postRequestDTO.getUpdatedAt());
+
+      // 게시물 저장
+      postRepository.save(post);
+
+      // 업데이트된 게시물 정보 반환
+      return convertToDTO(post);
+    }
+
+  public void deletePostById(Long postId, Long userId) {
+    // 사용자 확인
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    // 게시물 확인
+    Post post = postRepository.findById(postId)
+            .orElseThrow(() -> new RuntimeException("Post not found"));
+
+    // 사용자의 권한 확인 (예: 사용자 ID를 사용)
+    if (!user.getId().equals(post.getUser().getId())) {
+      throw new RuntimeException("해당 게시글의 작성자가 아님");
+    }
+    postRepository.deleteById(postId);
+  }
+  }
 

@@ -67,4 +67,46 @@ public class PostController {
     }
   }
 
+  @PutMapping("/edit")
+  public ResponseEntity<?> updatePostById(@AuthenticationPrincipal UserDetails userDetails, @RequestBody PostRequestDTO dto) {
+    try {
+      if (userDetails == null) {
+        // 사용자 정보가 없는 경우 처리
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+      }
+      log.info("🍒🍒🍒userDetails: " + userDetails);
+
+      PostResponseDTO post = postService.updatePostById(dto, Long.valueOf(userDetails.getUsername()));
+
+      // 업데이트에 실패한 경우
+      if (post == null) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to update the post");
+      }
+
+      return ResponseEntity.ok(post);
+    } catch (Exception e) {
+      log.warn("Error updating post: ", e);
+      return ResponseEntity.badRequest().build();
+    }
+  }
+
+  @DeleteMapping("/delete")
+  public ResponseEntity<?> deletePostById(@AuthenticationPrincipal UserDetails userDetails, @RequestParam Long postId) {
+    try {
+      if (userDetails == null) {
+        // 사용자 정보가 없는 경우 처리
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+      }
+      log.info("🍒🍒🍒userDetails: " + userDetails);
+
+      postService.deletePostById(postId, Long.valueOf(userDetails.getUsername()));
+
+      return ResponseEntity.ok("삭제 완료");
+    } catch (Exception e) {
+      log.warn("Error deleting post: ", e);
+      return ResponseEntity.badRequest().build();
+    }
+  }
+
+
 }

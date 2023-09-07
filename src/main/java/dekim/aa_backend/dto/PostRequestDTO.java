@@ -2,6 +2,8 @@ package dekim.aa_backend.dto;
 
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -14,4 +16,6 @@ public class PostRequestDTO {
   private String content;
   private String imgUrl;
   private String nickname;
+  private Long userId;
+  private LocalDateTime updatedAt;
 }
