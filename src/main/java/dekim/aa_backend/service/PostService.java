@@ -76,11 +76,11 @@ public class PostService {
 
 
   private void validate(final PostRequestDTO dto) {
-    if(dto == null) {
+    if (dto == null) {
       log.warn("Entity cannot be null.");
       throw new RuntimeException("Entity cannot be null.");
     }
-    if(dto.getNickname() == null) {
+    if (dto.getNickname() == null) {
       log.warn("Unknown user.");
       throw new RuntimeException("Unknown user.");
     }
@@ -111,33 +111,33 @@ public class PostService {
             .build();
   }
 
-    public PostResponseDTO updatePostById(PostRequestDTO postRequestDTO, Long userId) {
-      // 사용자 확인
-      User user = userRepository.findById(userId)
-              .orElseThrow(() -> new RuntimeException("User not found"));
+  public PostResponseDTO updatePostById(PostRequestDTO postRequestDTO, Long userId) {
+    // 사용자 확인
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
 
-      // 게시물 확인
-      Post post = postRepository.findById(postRequestDTO.getId())
-              .orElseThrow(() -> new RuntimeException("Post not found"));
+    // 게시물 확인
+    Post post = postRepository.findById(postRequestDTO.getId())
+            .orElseThrow(() -> new RuntimeException("Post not found"));
 
-      // 사용자의 권한 확인 (예: 사용자 ID를 사용)
-      if (!user.getId().equals(post.getUser().getId())) {
-        throw new RuntimeException("해당 게시글의 작성자가 아님");
-      }
-
-      // 게시물 업데이트
-      post.setBoardCategory(postRequestDTO.getBoardCategory());
-      post.setTopic(postRequestDTO.getTopic());
-      post.setTitle(postRequestDTO.getTitle());
-      post.setContent(postRequestDTO.getContent());
-      post.setUpdatedAt(postRequestDTO.getUpdatedAt());
-
-      // 게시물 저장
-      postRepository.save(post);
-
-      // 업데이트된 게시물 정보 반환
-      return convertToDTO(post);
+    // 사용자의 권한 확인 (예: 사용자 ID를 사용)
+    if (!user.getId().equals(post.getUser().getId())) {
+      throw new RuntimeException("해당 게시글의 작성자가 아님");
     }
+
+    // 게시물 업데이트
+    post.setBoardCategory(postRequestDTO.getBoardCategory());
+    post.setTopic(postRequestDTO.getTopic());
+    post.setTitle(postRequestDTO.getTitle());
+    post.setContent(postRequestDTO.getContent());
+    post.setUpdatedAt(postRequestDTO.getUpdatedAt());
+
+    // 게시물 저장
+    postRepository.save(post);
+
+    // 업데이트된 게시물 정보 반환
+    return convertToDTO(post);
+  }
 
   public void deletePostById(Long postId, Long userId) {
     // 사용자 확인
@@ -154,5 +154,21 @@ public class PostService {
     }
     postRepository.deleteById(postId);
   }
-  }
 
+  public void increaseViewCount(Long postId, Long userId) {
+    Optional<User> userOptional = userRepository.findById(userId);
+    if (!userOptional.isPresent()) {
+      throw new RuntimeException("User not found");
+    }
+
+    Post post = postRepository.findById(postId)
+            .orElseThrow(() -> new RuntimeException("Post not found"));
+
+    if (!userOptional.get().getId().equals(post.getUser().getId())) {
+      post.setViewCount(post.getViewCount() + 1);
+      postRepository.save(post);
+    } else {
+      throw new RuntimeException("Permission denied");
+    }
+  }
+}

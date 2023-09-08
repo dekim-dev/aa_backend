@@ -3,6 +3,7 @@ package dekim.aa_backend.controller;
 import dekim.aa_backend.dto.PostRequestDTO;
 import dekim.aa_backend.dto.PostResponseDTO;
 import dekim.aa_backend.service.PostService;
+import jakarta.websocket.server.PathParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -108,5 +109,22 @@ public class PostController {
     }
   }
 
+  @PutMapping("/view-count")
+  public ResponseEntity<?> increaseViewCount(@AuthenticationPrincipal UserDetails userDetails, @RequestParam Long postId) {
+    try {
+      if (userDetails == null) {
+        // 사용자 정보가 없는 경우 처리
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+      }
+      log.info("🍒🍒🍒userDetails: " + userDetails);
+
+      postService.increaseViewCount(postId, Long.valueOf(userDetails.getUsername()));
+
+      return ResponseEntity.ok("조회수 증가 성공");
+    } catch (Exception e) {
+      log.warn("조회수 증가 실패: ", e);
+      return ResponseEntity.badRequest().build();
+    }
+  }
 
 }
