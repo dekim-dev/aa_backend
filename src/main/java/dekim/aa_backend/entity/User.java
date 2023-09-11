@@ -10,7 +10,9 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity // 엔티티로 지정 (해당 클래스의 인스턴스들은 JPA로 관리되는 앤티티 객체라는 것을 의미)
 @Data // getter, setter ...
@@ -77,6 +79,9 @@ public class User {
 
   @OneToMany(mappedBy = "user")
   private List<Diary> diaries = new ArrayList<>();
+
+  @OneToMany(mappedBy = "user")
+  private Set<Likes> likes = new HashSet<>();
 }
 
 // 📌연관 관계의 주인이 아닌 객체에서 mappedBy 속성을 사용해서 주인을 지정해줘야 하고, 연관관계의 주인은 항상 N

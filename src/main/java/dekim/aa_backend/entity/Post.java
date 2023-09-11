@@ -7,7 +7,9 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -29,7 +31,7 @@ public class Post {
   @Column
   private String topic;
 
-  @Column(nullable = false, length = 30)
+  @Column(nullable = false)
   private String title;
 
   @Column(nullable = false, length = 4000)
@@ -41,8 +43,8 @@ public class Post {
   @Column
   private int viewCount;
 
-  @Column
-  private int likes;
+  @Column(nullable = true)
+  private int likesCount;
 
   @CreationTimestamp
   @Column
@@ -59,4 +61,6 @@ public class Post {
   @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   private List<Comment> comments;
 
+  @OneToMany(mappedBy = "post")
+  private Set<Likes> likes = new HashSet<>();
 }

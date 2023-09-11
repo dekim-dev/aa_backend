@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.Optional;
 
 @Slf4j
@@ -67,6 +68,7 @@ public class PostService {
             .topic(postRequestDTO.getTopic())
             .title(postRequestDTO.getTitle())
             .content(postRequestDTO.getContent())
+            .likes(new HashSet<>()) // HashSet 초기화 -> null 에러 해결
             .user(user)
             .build();
 
@@ -101,13 +103,14 @@ public class PostService {
             .content(post.getContent())
             .imgUrl(post.getImgUrl())
             .viewCount(post.getViewCount())
-            .likes(post.getLikes())
+            .likesCount(post.getLikes().size())
             .createdAt(post.getCreatedAt())
             .updatedAt(post.getUpdatedAt())
             .nickname(post.getUser().getNickname())
             .userId(post.getUser().getId())
             .pfImg(post.getUser().getPfImg())
             .comments(post.getComments())
+            .likes(post.getLikes())
             .build();
   }
 
