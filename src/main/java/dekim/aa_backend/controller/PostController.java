@@ -1,7 +1,9 @@
 package dekim.aa_backend.controller;
 
+import dekim.aa_backend.dto.CommentDTO;
 import dekim.aa_backend.dto.PostRequestDTO;
 import dekim.aa_backend.dto.PostResponseDTO;
+import dekim.aa_backend.entity.Comment;
 import dekim.aa_backend.service.PostService;
 import jakarta.websocket.server.PathParam;
 import lombok.extern.slf4j.Slf4j;
@@ -127,4 +129,44 @@ public class PostController {
     }
   }
 
+  // 댓글 작성
+  @PostMapping("/{postId}/comment")
+  public ResponseEntity<?> createComment(@AuthenticationPrincipal UserDetails userDetails, @RequestBody CommentDTO commentDTO, @PathVariable Long postId) throws IllegalAccessException {
+    try {
+      if (userDetails == null) {// 사용자 정보가 없는 경우 처리
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+      }
+      Comment newComment = postService.createComment(Long.valueOf(userDetails.getUsername()), postId, commentDTO);
+      CommentDTO response = CommentDTO.builder().id(newComment.getId()).userId(newComment.getUser().getId()).content(newComment.getContent()).createdAt(newComment.getCreatedAt()).postId(newComment.getPost().getId()).nickname(newComment.getUser().getNickname()).build();
+      return new ResponseEntity<>(response,HttpStatus.OK);
+    } catch (Exception e) {
+      return new ResponseEntity<>("failed to update the comment", HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  // 댓글 수정
+  @PutMapping("/{commentId}/comment")
+  public ResponseEntity<?> updateComment(@PathVariable Long commentId, @RequestBody CommentDTO commentDTO,
+                                       @AuthenticationPrincipal UserDetails userDetails) {
+    try {
+      if (userDetails == null) { // 사용자 정보가 없는 경우 처리
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+      }
+        CommentDTO updatedComment = postService.updateComment(commentId, commentDTO, Long.valueOf(userDetails.getUsername()));
+        return new ResponseEntity<>(updatedComment, HttpStatus.OK);
+    } catch (IllegalAccessException e) {
+      return new ResponseEntity<>("failed to update the comment" + e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  // 댓글 삭제
+  @DeleteMapping("/{commentId}/comment")
+  public ResponseEntity<?> deleteComment(@PathVariable Long commentId,
+                                       @AuthenticationPrincipal UserDetails userDetails) {
+    if (userDetails == null) { // 사용자 정보가 없는 경우 처리
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+    }
+    postService.deleteComment(commentId, Long.valueOf(userDetails.getUsername()));
+    return new ResponseEntity<>("댓글 삭제 성공 ", HttpStatus.OK);
+  }
 }

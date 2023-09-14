@@ -69,7 +69,7 @@ public class User {
   private List<Post> posts = new ArrayList<>();
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-  private List<Comment> replies = new ArrayList<>();
+  private List<Comment> comments = new ArrayList<>();
 
   @OneToMany(mappedBy = "user")
   private List<TodoList> todoLists = new ArrayList<>();

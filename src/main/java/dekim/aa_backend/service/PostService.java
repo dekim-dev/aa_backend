@@ -1,9 +1,12 @@
 package dekim.aa_backend.service;
 
+import dekim.aa_backend.dto.CommentDTO;
 import dekim.aa_backend.dto.PostRequestDTO;
 import dekim.aa_backend.dto.PostResponseDTO;
+import dekim.aa_backend.entity.Comment;
 import dekim.aa_backend.entity.Post;
 import dekim.aa_backend.entity.User;
+import dekim.aa_backend.persistence.CommentRepository;
 import dekim.aa_backend.persistence.PostRepository;
 import dekim.aa_backend.persistence.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -14,8 +17,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -25,6 +31,8 @@ public class PostService {
   private PostRepository postRepository;
   @Autowired
   private UserRepository userRepository;
+  @Autowired
+  private CommentRepository commentRepository;
 
   public Optional<Post> retrieve(Long postId) {
     return postRepository.findById(postId);
@@ -95,6 +103,17 @@ public class PostService {
   }
 
   private PostResponseDTO convertToDTO(Post post) {
+    // 댓글에서 유저의 정보를 사용하기 위해 commentDTO 사용 -> @JsonIgnore..
+    List<CommentDTO> commentDTOList = post.getComments().stream()
+            .map(comment -> CommentDTO.builder()
+                    .id(comment.getId())
+                    .nickname(comment.getUser().getNickname())
+                    .content(comment.getContent())
+                    .createdAt(comment.getCreatedAt())
+                    .updatedAt(comment.getUpdatedAt())
+                    .userId(comment.getUser().getId())
+                    .build())
+            .toList();
     return PostResponseDTO.builder()
             .id(post.getId())
             .boardCategory(post.getBoardCategory())
@@ -109,7 +128,7 @@ public class PostService {
             .nickname(post.getUser().getNickname())
             .userId(post.getUser().getId())
             .pfImg(post.getUser().getPfImg())
-            .comments(post.getComments())
+            .commentsDTO(commentDTOList) // 댓글 정보를 CommentDTO의 리스트로 설정
             .likes(post.getLikes())
             .build();
   }
@@ -172,6 +191,53 @@ public class PostService {
       postRepository.save(post);
     } else {
       throw new RuntimeException("Permission denied");
+    }
+  }
+
+  // 댓글 작성
+  public Comment createComment(Long userId, Long postId, CommentDTO commentDTO) throws IllegalAccessException {
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    Post post = postRepository.findById(postId)
+            .orElseThrow(() -> new IllegalAccessException("Post not Found." + postId));
+
+    return  commentRepository.save(Comment.builder()
+                    .id(commentDTO.getId())
+            .createdAt(LocalDateTime.now())
+            .content(commentDTO.getContent())
+            .user(user)
+            .post(post)
+            .build());
+  }
+
+  // 댓글 수정
+  public CommentDTO updateComment(Long commentId, CommentDTO commentDTO, Long userId) throws IllegalAccessException {
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(() -> new IllegalArgumentException("Comment not found."));
+
+    if (user.getId().equals(comment.getUser().getId())) {
+      comment.setContent(commentDTO.getContent());
+      comment.setUpdatedAt(LocalDateTime.now());
+      commentRepository.save(comment);
+      return CommentDTO.builder().id(comment.getId()).content(comment.getContent()).updatedAt(comment.getUpdatedAt()).nickname(comment.getUser().getNickname()).userId(comment.getUser().getId()).postId(comment.getPost().getId()).build();
+    } else {
+      throw new IllegalArgumentException("Unauthorized : not your comment");
+    }
+  }
+
+  // 댓글 삭제
+  public void deleteComment(Long commentId, Long userId) {
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(() -> new IllegalArgumentException("Comment not found."));
+
+    if (user.getId().equals(comment.getUser().getId())) {
+      commentRepository.delete(comment);
+    } else {
+      throw new IllegalArgumentException("Unauthorized : not your comment");
     }
   }
 }

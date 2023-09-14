@@ -1,10 +1,8 @@
 package dekim.aa_backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -15,6 +13,8 @@ import java.time.LocalDateTime;
 @Setter
 @Table(name = "COMMENT_TB")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
+@AllArgsConstructor
 public class Comment {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
@@ -33,11 +33,13 @@ public class Comment {
   private LocalDateTime updatedAt;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "userNo")
+  @JoinColumn(name = "user_no")
+  @JsonIgnore
   private User user;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "postNo")
+  @JoinColumn(name = "post_no")
+  @JsonIgnore
   private Post post;
 
   @ManyToOne(fetch = FetchType.LAZY)

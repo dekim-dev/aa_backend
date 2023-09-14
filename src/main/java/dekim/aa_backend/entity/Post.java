@@ -1,8 +1,11 @@
 package dekim.aa_backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -56,9 +59,11 @@ public class Post {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "userNo") // userNo 컬럼을 사용하여 연관 관계 설정
+  @JsonIgnore
   private User user;
 
   @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  @Fetch(FetchMode.SUBSELECT)
   private List<Comment> comments;
 
   @OneToMany(mappedBy = "post")

@@ -1,6 +1,5 @@
 package dekim.aa_backend.dto;
 
-import dekim.aa_backend.entity.Comment;
 import dekim.aa_backend.entity.Likes;
 import lombok.*;
 
@@ -27,6 +26,6 @@ public class PostResponseDTO {
   private String nickname;
   private Long userId;
   private String pfImg;
-  private List<Comment> comments;
+  private List<CommentDTO> commentsDTO; // 회원 정보를 받아오기 위해 DTO 로 받기
   private Set<Likes> likes;
 }
