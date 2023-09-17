@@ -48,17 +48,14 @@ public class Clinic {
   private int viewCount;
 
   @Column
-  private int likes;
-
-  @Column
-  private int treatADHD;
+  private int recommendation;
 
   @OneToMany(mappedBy = "clinic", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   private List<Comment> comments;
 
   @Builder
   public Clinic(String hpid, String name, String address, String detailedAddr, String tel, String info,
-                double latitude, double longitude) {
+                double latitude, double longitude, int recommendation) {
     this.hpid = hpid;
     this.name = name;
     this.address = address;
@@ -67,5 +64,6 @@ public class Clinic {
     this.info = info;
     this.latitude = latitude;
     this.longitude = longitude;
+    this.recommendation = recommendation;
   }
 }

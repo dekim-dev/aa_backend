@@ -5,7 +5,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import dekim.aa_backend.entity.Clinic;
+import dekim.aa_backend.entity.User;
 import dekim.aa_backend.persistence.ClinicRepository;
+import dekim.aa_backend.persistence.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +35,7 @@ public class ClinicService {
   private String serviceKey;
 
   private final ClinicRepository clinicRepository;
+  private final UserRepository userRepository;
 
 
   /* 공공 데이터 가져오기 */
@@ -85,6 +89,7 @@ public class ClinicService {
             .tel(clinicJson.get("dutyTel1").asText())
             .latitude(clinicJson.get("wgs84Lat").asDouble())
             .longitude(clinicJson.get("wgs84Lon").asDouble())
+            .recommendation(0)
             .build();
 
 
