@@ -6,9 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import dekim.aa_backend.dto.ClinicRecommendationDTO;
 import dekim.aa_backend.dto.ClinicDTO;
+import dekim.aa_backend.dto.CommentDTO;
 import dekim.aa_backend.entity.*;
 import dekim.aa_backend.persistence.ClinicRecommendationRepository;
 import dekim.aa_backend.persistence.ClinicRepository;
+import dekim.aa_backend.persistence.CommentRepository;
 import dekim.aa_backend.persistence.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -27,6 +29,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Slf4j
@@ -40,6 +43,7 @@ public class ClinicService {
   private final ClinicRepository clinicRepository;
   private final UserRepository userRepository;
   private final ClinicRecommendationRepository clinicRecommendationRepository;
+  private final CommentRepository commentRepository;
 
 
   /* 공공 데이터 가져오기 */
@@ -171,6 +175,16 @@ public class ClinicService {
   }
 
   private ClinicDTO convertToClinicDTO(Clinic clinic) {
+    List<CommentDTO> commentDTOList = clinic.getComments().stream()
+            .map(comment -> CommentDTO.builder()
+                    .id(comment.getId())
+                    .nickname(comment.getUser().getNickname())
+                    .content(comment.getContent())
+                    .createdAt(comment.getCreatedAt())
+                    .updatedAt(comment.getUpdatedAt())
+                    .userId(comment.getUser().getId())
+                    .build())
+            .toList();
     ClinicDTO clinicRequestDTO = new ClinicDTO();
     clinicRequestDTO.setId(clinic.getId());
     clinicRequestDTO.setHpid(clinic.getHpid());
@@ -184,6 +198,7 @@ public class ClinicService {
     clinicRequestDTO.setLongitude(clinic.getLongitude());
     clinicRequestDTO.setViewCount(clinic.getViewCount());
     clinicRequestDTO.setRecommendCount(clinic.getRecommendations().size());
+    clinicRequestDTO.setCommentDTOs(commentDTOList);
     return clinicRequestDTO;
   }
 
@@ -225,5 +240,59 @@ public class ClinicService {
     clinicRecommendationRepository.delete(existingRecommendation.get());
     // 존재하면 삭제하고 isAdded 를 false 로 반환
     return ClinicRecommendationDTO.builder().userId(userId).clinicId(clinicId).isRecommended(false).build();
+  }
+
+  /* 댓글 */
+  // 댓글 생성
+  public Comment createComment(Long userId, Long clinicId, CommentDTO commentDTO) throws IllegalAccessException {
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    Clinic clinic = clinicRepository.findById(clinicId)
+            .orElseThrow(() -> new IllegalAccessException("Clinic not Found." + clinicId));
+
+    return  commentRepository.save(Comment.builder()
+            .id(commentDTO.getId())
+            .createdAt(LocalDateTime.now())
+            .content(commentDTO.getContent())
+            .user(user)
+            .clinic(clinic)
+            .build());
+  }
+  // 댓글 수정
+  public CommentDTO updateComment(Long commentId, CommentDTO commentDTO, Long userId) throws IllegalAccessException {
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(() -> new IllegalArgumentException("Comment not found."));
+
+    if (user.getId().equals(comment.getUser().getId())) {
+      comment.setContent(commentDTO.getContent());
+      comment.setUpdatedAt(LocalDateTime.now());
+      commentRepository.save(comment);
+      return CommentDTO.builder()
+              .id(comment.getId())
+              .content(comment.getContent())
+              .updatedAt(comment.getUpdatedAt())
+              .nickname(comment.getUser().getNickname())
+              .userId(comment.getUser().getId())
+              .clinicId(comment.getClinic().getId())
+              .build();
+    } else {
+      throw new IllegalArgumentException("Unauthorized : not your comment");
+    }
+  }
+
+  // 댓글 삭제
+  public void deleteComment(Long commentId, Long userId) {
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(() -> new IllegalArgumentException("Comment not found."));
+
+    if (user.getId().equals(comment.getUser().getId())) {
+      commentRepository.delete(comment);
+    } else {
+      throw new IllegalArgumentException("Unauthorized : not your comment");
+    }
   }
 }

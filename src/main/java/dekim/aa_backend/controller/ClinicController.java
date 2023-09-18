@@ -3,8 +3,12 @@ package dekim.aa_backend.controller;
 import dekim.aa_backend.dto.ClinicRecommendationDTO;
 import dekim.aa_backend.dto.ClinicDTO;
 import dekim.aa_backend.dto.ClinicSearchResponseDTO;
+import dekim.aa_backend.dto.CommentDTO;
 import dekim.aa_backend.entity.Clinic;
+import dekim.aa_backend.entity.Comment;
+import dekim.aa_backend.entity.User;
 import dekim.aa_backend.service.ClinicService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -16,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 @Slf4j
 @RestController
@@ -115,6 +120,53 @@ public class ClinicController {
     } catch (Exception e) {
       return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
     }
+  }
+
+  /* 댓글 */
+  // 댓글 생성
+  @PostMapping("/{clinicId}/comment")
+  public ResponseEntity<?> createComment(@AuthenticationPrincipal UserDetails userDetails, @RequestBody CommentDTO commentDTO, @PathVariable Long clinicId) throws IllegalAccessException {
+    try {
+      if (userDetails == null) {// 사용자 정보가 없는 경우 처리
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+      }
+      Comment newComment = clinicService.createComment(Long.valueOf(userDetails.getUsername()), clinicId, commentDTO);
+      CommentDTO response = CommentDTO.builder()
+              .id(newComment.getId())
+              .userId(newComment.getUser().getId())
+              .content(newComment.getContent())
+              .createdAt(newComment.getCreatedAt())
+              .clinicId(clinicId)
+              .build();
+      return new ResponseEntity<>(response,HttpStatus.OK);
+    } catch (Exception e) {
+      return new ResponseEntity<>("failed to update the comment", HttpStatus.BAD_REQUEST);
+    }
+  }
+  // 댓글 수정
+  @PutMapping("/{commentId}/comment")
+  public ResponseEntity<?> updateComment(@PathVariable Long commentId, @RequestBody CommentDTO commentDTO,
+                                         @AuthenticationPrincipal UserDetails userDetails) {
+    try {
+      if (userDetails == null) { // 사용자 정보가 없는 경우 처리
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+      }
+      CommentDTO updatedComment = clinicService.updateComment(commentId, commentDTO, Long.valueOf(userDetails.getUsername()));
+      return new ResponseEntity<>(updatedComment, HttpStatus.OK);
+    } catch (IllegalAccessException e) {
+      return new ResponseEntity<>("failed to update the comment" + e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  // 댓글 삭제
+  @DeleteMapping("/{commentId}/comment")
+  public ResponseEntity<?> deleteComment(@PathVariable Long commentId,
+                                         @AuthenticationPrincipal UserDetails userDetails) {
+    if (userDetails == null) { // 사용자 정보가 없는 경우 처리
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+    }
+    clinicService.deleteComment(commentId, Long.valueOf(userDetails.getUsername()));
+    return new ResponseEntity<>("댓글 삭제 성공 ", HttpStatus.OK);
   }
 }
 

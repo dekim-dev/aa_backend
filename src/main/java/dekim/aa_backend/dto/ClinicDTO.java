@@ -22,5 +22,6 @@ public class ClinicDTO {
   private int viewCount;
   private String scheduleJson;
   private int recommendCount;
+  private List<CommentDTO> commentDTOs;
 }
 
