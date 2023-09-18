@@ -5,8 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import dekim.aa_backend.dto.ClinicRecommendationDTO;
-import dekim.aa_backend.dto.ClinicRequestDTO;
-import dekim.aa_backend.dto.LikesDTO;
+import dekim.aa_backend.dto.ClinicDTO;
 import dekim.aa_backend.entity.*;
 import dekim.aa_backend.persistence.ClinicRecommendationRepository;
 import dekim.aa_backend.persistence.ClinicRepository;
@@ -29,7 +28,6 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -165,9 +163,28 @@ public class ClinicService {
 
 
   /* DB에서 병원 데이터 가져오기 */
-  public Page<Clinic> fetchClinicList(int page, int pageSize) {
+  public Page<ClinicDTO> fetchClinicList(int page, int pageSize) {
     PageRequest pageRequest = PageRequest.of(page, pageSize);
-    return clinicRepository.findAll(pageRequest);
+    Page<Clinic> clinicPage = clinicRepository.findAll(pageRequest);
+    log.info("🎈clinicPage : " + clinicPage.get().toList().stream().toList());
+    return clinicPage.map(this::convertToClinicDTO);
+  }
+
+  private ClinicDTO convertToClinicDTO(Clinic clinic) {
+    ClinicDTO clinicRequestDTO = new ClinicDTO();
+    clinicRequestDTO.setId(clinic.getId());
+    clinicRequestDTO.setHpid(clinic.getHpid());
+    clinicRequestDTO.setName(clinic.getName());
+    clinicRequestDTO.setAddress(clinic.getAddress());
+    clinicRequestDTO.setDetailedAddr(clinic.getDetailedAddr());
+    clinicRequestDTO.setTel(clinic.getTel());
+    clinicRequestDTO.setInfo(clinic.getInfo());
+    clinicRequestDTO.setScheduleJson(clinic.getScheduleJson());
+    clinicRequestDTO.setLatitude(clinic.getLatitude());
+    clinicRequestDTO.setLongitude(clinic.getLongitude());
+    clinicRequestDTO.setViewCount(clinic.getViewCount());
+    clinicRequestDTO.setRecommendCount(clinic.getRecommendations().size());
+    return clinicRequestDTO;
   }
 
 
@@ -178,22 +195,9 @@ public class ClinicService {
 
 
   /* id로 병원 정보 가져오기 */
-  public ClinicRequestDTO getClinicInfoById(Long id) {
+  public ClinicDTO getClinicInfoById(Long id) {
     Clinic clinic = clinicRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Clinic not found"));
-    return ClinicRequestDTO.builder()
-            .hpid(clinic.getHpid())
-            .address(clinic.getAddress())
-            .detailedAddr(clinic.getDetailedAddr())
-            .id(clinic.getId())
-            .info(clinic.getInfo())
-            .longitude(clinic.getLongitude())
-            .latitude(clinic.getLatitude())
-            .name(clinic.getName())
-            .viewCount(clinic.getViewCount())
-            .tel(clinic.getTel())
-            .scheduleJson(clinic.getScheduleJson())
-            .recommendCount(clinic.getRecommendations().size())
-            .info(clinic.getInfo()).build();
+    return convertToClinicDTO(clinic);
   }
 
 

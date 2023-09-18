@@ -2,12 +2,14 @@ package dekim.aa_backend.dto;
 
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
-public class ClinicRequestDTO {
+public class ClinicDTO {
   private Long id;
   private String hpid;
   private String name;

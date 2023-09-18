@@ -1,9 +1,8 @@
 package dekim.aa_backend.controller;
 
 import dekim.aa_backend.dto.ClinicRecommendationDTO;
-import dekim.aa_backend.dto.ClinicRequestDTO;
+import dekim.aa_backend.dto.ClinicDTO;
 import dekim.aa_backend.dto.ClinicSearchResponseDTO;
-import dekim.aa_backend.dto.LikesDTO;
 import dekim.aa_backend.entity.Clinic;
 import dekim.aa_backend.service.ClinicService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +16,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -53,11 +51,11 @@ public class ClinicController {
 
   /* DB에서 병원 리스트 가져오기 */
   @GetMapping("/list")
-  public ResponseEntity<Page<Clinic>> getClinicList(@RequestParam("page") int page,
-                                                    @RequestParam("pageSize") int pageSize) {
-      // 페이징 된 병원 데이터 가져오기
-      Page<Clinic> clinicPage = clinicService.fetchClinicList(page, pageSize);
-      return ResponseEntity.ok(clinicPage);
+  public ResponseEntity<Page<ClinicDTO>> getClinicList(@RequestParam("page") int page,
+                                                       @RequestParam("pageSize") int pageSize) {
+    // 페이징 된 병원 데이터 가져오기
+    Page<ClinicDTO> clinicPage = clinicService.fetchClinicList(page, pageSize);
+    return ResponseEntity.ok(clinicPage);
   }
 
 
@@ -81,8 +79,8 @@ public class ClinicController {
 /* 병원 디테일 정보 */
   @GetMapping("/{id}")
   public ResponseEntity<?> getClinicInfoById(@PathVariable Long id) {
-    ClinicRequestDTO clinic = clinicService.getClinicInfoById(id);
-    return ResponseEntity.ok(clinic);
+    ClinicDTO clinicDTO = clinicService.getClinicInfoById(id);
+    return ResponseEntity.ok(clinicDTO);
   }
 
 
