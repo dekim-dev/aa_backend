@@ -1,6 +1,9 @@
 package dekim.aa_backend.controller;
 
+import dekim.aa_backend.dto.ClinicRecommendationDTO;
+import dekim.aa_backend.dto.ClinicRequestDTO;
 import dekim.aa_backend.dto.ClinicSearchResponseDTO;
+import dekim.aa_backend.dto.LikesDTO;
 import dekim.aa_backend.entity.Clinic;
 import dekim.aa_backend.service.ClinicService;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -76,7 +81,7 @@ public class ClinicController {
 /* 병원 디테일 정보 */
   @GetMapping("/{id}")
   public ResponseEntity<?> getClinicInfoById(@PathVariable Long id) {
-    Optional<Clinic> clinic = clinicService.getClinicInfoById(id);
+    ClinicRequestDTO clinic = clinicService.getClinicInfoById(id);
     return ResponseEntity.ok(clinic);
   }
 
@@ -95,6 +100,23 @@ public class ClinicController {
     dto.setTotalResults(clinics.getTotalElements());
 
     return ResponseEntity.ok(dto);
+  }
+
+  /* 병원 추천 */
+  @PostMapping("/recommendation/{clinicId}")
+  public ResponseEntity<?> createDeleteARecommendation(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long clinicId) {
+    try {
+      if (userDetails == null) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+      }
+      ClinicRecommendationDTO recommendation = clinicService.createDeleteRecommendation(Long.valueOf(userDetails.getUsername()), clinicId);
+      if(recommendation.isRecommended()) {
+        return new ResponseEntity<>(recommendation, HttpStatus.CREATED); // 추천 추가
+      }
+      return new ResponseEntity<>(recommendation, HttpStatus.OK); // 이미 추천을 한 경우 삭제
+    } catch (Exception e) {
+      return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+    }
   }
 }
 

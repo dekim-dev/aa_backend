@@ -1,21 +1,24 @@
 package dekim.aa_backend.dto;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@Builder
+@AllArgsConstructor
 public class ClinicRequestDTO {
+  private Long id;
   private String hpid;
   private String name;
   private String address;
   private String detailedAddr;
   private String tel;
   private String info;
-  private String scheduleJson;
-  private double longitude;
   private double latitude;
+  private double longitude;
+  private int viewCount;
+  private String scheduleJson;
+  private int recommendCount;
 }
 

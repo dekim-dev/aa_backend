@@ -3,7 +3,9 @@ package dekim.aa_backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "CLINIC_TB")
@@ -47,15 +49,15 @@ public class Clinic {
   @Column
   private int viewCount;
 
-  @Column
-  private int recommendation;
+  @OneToMany(mappedBy = "clinic")
+  private Set<ClinicRecommendation> recommendations = new HashSet<>();
 
   @OneToMany(mappedBy = "clinic", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   private List<Comment> comments;
 
   @Builder
   public Clinic(String hpid, String name, String address, String detailedAddr, String tel, String info,
-                double latitude, double longitude, int recommendation) {
+                double latitude, double longitude) {
     this.hpid = hpid;
     this.name = name;
     this.address = address;
@@ -64,6 +66,6 @@ public class Clinic {
     this.info = info;
     this.latitude = latitude;
     this.longitude = longitude;
-    this.recommendation = recommendation;
+
   }
 }

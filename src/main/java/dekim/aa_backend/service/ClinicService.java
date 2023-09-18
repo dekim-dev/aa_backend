@@ -4,11 +4,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import dekim.aa_backend.entity.Clinic;
-import dekim.aa_backend.entity.User;
+import dekim.aa_backend.dto.ClinicRecommendationDTO;
+import dekim.aa_backend.dto.ClinicRequestDTO;
+import dekim.aa_backend.dto.LikesDTO;
+import dekim.aa_backend.entity.*;
+import dekim.aa_backend.persistence.ClinicRecommendationRepository;
 import dekim.aa_backend.persistence.ClinicRepository;
 import dekim.aa_backend.persistence.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +29,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -36,6 +41,7 @@ public class ClinicService {
 
   private final ClinicRepository clinicRepository;
   private final UserRepository userRepository;
+  private final ClinicRecommendationRepository clinicRecommendationRepository;
 
 
   /* 공공 데이터 가져오기 */
@@ -89,7 +95,6 @@ public class ClinicService {
             .tel(clinicJson.get("dutyTel1").asText())
             .latitude(clinicJson.get("wgs84Lat").asDouble())
             .longitude(clinicJson.get("wgs84Lon").asDouble())
-            .recommendation(0)
             .build();
 
 
@@ -173,8 +178,22 @@ public class ClinicService {
 
 
   /* id로 병원 정보 가져오기 */
-  public Optional<Clinic> getClinicInfoById(Long id) {
-    return clinicRepository.findById(id);
+  public ClinicRequestDTO getClinicInfoById(Long id) {
+    Clinic clinic = clinicRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Clinic not found"));
+    return ClinicRequestDTO.builder()
+            .hpid(clinic.getHpid())
+            .address(clinic.getAddress())
+            .detailedAddr(clinic.getDetailedAddr())
+            .id(clinic.getId())
+            .info(clinic.getInfo())
+            .longitude(clinic.getLongitude())
+            .latitude(clinic.getLatitude())
+            .name(clinic.getName())
+            .viewCount(clinic.getViewCount())
+            .tel(clinic.getTel())
+            .scheduleJson(clinic.getScheduleJson())
+            .recommendCount(clinic.getRecommendations().size())
+            .info(clinic.getInfo()).build();
   }
 
 
@@ -183,4 +202,24 @@ public class ClinicService {
     return clinicRepository.findByAddressContaining(address, pageable);
   }
 
+  /* 병원 추천 */
+  @Transactional
+  public ClinicRecommendationDTO createDeleteRecommendation(Long userId, Long clinicId) {
+    // 사용자와 게시물을 조회
+    User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
+    Clinic clinic = clinicRepository.findById(clinicId).orElseThrow(() -> new EntityNotFoundException("Clinic not found"));
+    // 이미 좋아요를 누른 게시글인지 확인
+    Optional<ClinicRecommendation> existingRecommendation = clinicRecommendationRepository.findByUserIdAndClinicId(userId, clinicId);
+    if (existingRecommendation.isEmpty()) {
+      ClinicRecommendation newRecommendation = clinicRecommendationRepository.save(ClinicRecommendation.builder()
+              .user(user)
+              .clinic(clinic)
+              .build());
+      // 존재하지 않으면 추가하고 isRecommended 를 true 로 반환
+      return ClinicRecommendationDTO.builder().userId(newRecommendation.getUser().getId()).clinicId(newRecommendation.getClinic().getId()).isRecommended(true).build();
+    }
+    clinicRecommendationRepository.delete(existingRecommendation.get());
+    // 존재하면 삭제하고 isAdded 를 false 로 반환
+    return ClinicRecommendationDTO.builder().userId(userId).clinicId(clinicId).isRecommended(false).build();
+  }
 }
