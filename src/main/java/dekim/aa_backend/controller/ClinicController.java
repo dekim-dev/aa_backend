@@ -136,6 +136,7 @@ public class ClinicController {
               .userId(newComment.getUser().getId())
               .content(newComment.getContent())
               .createdAt(newComment.getCreatedAt())
+              .nickname(newComment.getUser().getNickname())
               .clinicId(clinicId)
               .build();
       return new ResponseEntity<>(response,HttpStatus.OK);
