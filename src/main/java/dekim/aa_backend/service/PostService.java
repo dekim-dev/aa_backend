@@ -246,4 +246,11 @@ public class PostService {
       throw new IllegalArgumentException("Unauthorized : not your comment");
     }
   }
+
+  // 제목+본문과 일치하는 검색어로 게시글 검색
+  public Page<PostResponseDTO> searchPosts(Long userId, String keyword, int page, int pageSize) {
+    PageRequest pageRequest = PageRequest.of(page, pageSize);
+    Page<Post> postPage = postRepository.searchByTitleOrContent(keyword, pageRequest);
+    return postPage.map(this::convertToDTO);
+  }
 }
