@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -104,16 +105,21 @@ public class PostService {
 
   private PostResponseDTO convertToDTO(Post post) {
     // 댓글에서 유저의 정보를 사용하기 위해 commentDTO 사용 -> @JsonIgnore..
-    List<CommentDTO> commentDTOList = post.getComments().stream()
-            .map(comment -> CommentDTO.builder()
-                    .id(comment.getId())
-                    .nickname(comment.getUser().getNickname())
-                    .content(comment.getContent())
-                    .createdAt(comment.getCreatedAt())
-                    .updatedAt(comment.getUpdatedAt())
-                    .userId(comment.getUser().getId())
-                    .build())
-            .toList();
+    List<CommentDTO> commentDTOList;
+    if (post.getComments() != null && !post.getComments().isEmpty()) {
+      commentDTOList = post.getComments().stream()
+              .map(comment -> CommentDTO.builder()
+                      .id(comment.getId())
+                      .nickname(comment.getUser().getNickname())
+                      .content(comment.getContent())
+                      .createdAt(comment.getCreatedAt())
+                      .updatedAt(comment.getUpdatedAt())
+                      .userId(comment.getUser().getId())
+                      .build())
+              .toList();
+    } else {
+      commentDTOList = Collections.emptyList();  // 댓글이 없을경우 emptyList 로 성정
+    }
     return PostResponseDTO.builder()
             .id(post.getId())
             .boardCategory(post.getBoardCategory())

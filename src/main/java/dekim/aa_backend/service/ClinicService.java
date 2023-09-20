@@ -175,16 +175,22 @@ public class ClinicService {
   }
 
   private ClinicDTO convertToClinicDTO(Clinic clinic) {
-    List<CommentDTO> commentDTOList = clinic.getComments().stream()
-            .map(comment -> CommentDTO.builder()
-                    .id(comment.getId())
-                    .nickname(comment.getUser().getNickname())
-                    .content(comment.getContent())
-                    .createdAt(comment.getCreatedAt())
-                    .updatedAt(comment.getUpdatedAt())
-                    .userId(comment.getUser().getId())
-                    .build())
-            .toList();
+    List<CommentDTO> commentDTOList;
+    if (clinic.getComments() != null && !clinic.getComments().isEmpty()) {
+      commentDTOList = clinic.getComments().stream()
+              .map(comment -> CommentDTO.builder()
+                      .id(comment.getId())
+                      .nickname(comment.getUser().getNickname())
+                      .content(comment.getContent())
+                      .createdAt(comment.getCreatedAt())
+                      .updatedAt(comment.getUpdatedAt())
+                      .userId(comment.getUser().getId())
+                      .build())
+              .toList();
+    } else {
+      commentDTOList = Collections.emptyList();  // 댓글이 없을경우 emptyList 로 성정
+    }
+
     ClinicDTO clinicRequestDTO = new ClinicDTO();
     clinicRequestDTO.setId(clinic.getId());
     clinicRequestDTO.setHpid(clinic.getHpid());
