@@ -66,6 +66,6 @@ public class Post {
   @Fetch(FetchMode.SUBSELECT)
   private List<Comment> comments;
 
-  @OneToMany(mappedBy = "post")
+  @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   private Set<Likes> likes = new HashSet<>();
 }

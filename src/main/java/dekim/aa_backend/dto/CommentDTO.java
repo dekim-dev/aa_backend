@@ -19,7 +19,12 @@ public class CommentDTO {
   private Long userId;
   private String pfImg;
   private Long postId;
+  private String postTitle;
+  private String postBoard;
+  private String postTopic;
+  private int likesCount;
   private Long clinicId;
+  private String clinicName;
 
   public CommentDTO(String content) { // 댓글 수정용
     this.content = content;
