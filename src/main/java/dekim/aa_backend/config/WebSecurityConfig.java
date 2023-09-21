@@ -29,9 +29,12 @@ public class WebSecurityConfig {
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authorizeHttpRequests(authorize -> authorize
-                    .requestMatchers(HttpMethod.OPTIONS, "/auth/**").permitAll() // OPTIONS 요청 허용
-                            .anyRequest().permitAll()
+                    .requestMatchers(HttpMethod.OPTIONS).permitAll() // OPTIONS 요청 허용
+                    .requestMatchers("/auth/**").permitAll()
+                    .requestMatchers("/admin/**").hasRole("ADMIN")
+                    .anyRequest().authenticated()
             )
+
             .exceptionHandling(customizer -> customizer
                     .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                     .accessDeniedHandler(jwtAccessDeniedHandler)
