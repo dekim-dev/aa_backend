@@ -57,7 +57,7 @@ public class Clinic {
 
   @Builder
   public Clinic(String hpid, String name, String address, String detailedAddr, String tel, String info,
-                double latitude, double longitude) {
+                double latitude, double longitude, String scheduleJson) {
     this.hpid = hpid;
     this.name = name;
     this.address = address;
@@ -66,6 +66,7 @@ public class Clinic {
     this.info = info;
     this.latitude = latitude;
     this.longitude = longitude;
+    this.scheduleJson = scheduleJson;
 
   }
 }
