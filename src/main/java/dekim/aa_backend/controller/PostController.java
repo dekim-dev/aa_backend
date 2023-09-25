@@ -170,17 +170,19 @@ public class PostController {
     return new ResponseEntity<>("댓글 삭제 성공 ", HttpStatus.OK);
   }
 
-  // 제목+본문과 일치하는 검색어로 게시글 검색
+  // 제목+본문+게시판 이름과 일치하는 검색어로 게시글 검색
   @GetMapping("/search")
-  public ResponseEntity<?> searchPosts(
+  public ResponseEntity<?> searchPostsByBoard(
           @AuthenticationPrincipal UserDetails userDetails,
           @RequestParam String keyword,
+          @RequestParam String boardCategory,
           @RequestParam(defaultValue = "0") int page,
           @RequestParam(defaultValue = "10") int pageSize) {
-    if (userDetails == null) { // 사용자 정보가 없는 경우 처리
+    if (userDetails == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
     }
-    Page<PostResponseDTO> posts = postService.searchPosts(Long.valueOf(userDetails.getUsername()), keyword, page, pageSize);
+    Page<PostResponseDTO> posts = postService.searchPostsByBoard(
+            Long.valueOf(userDetails.getUsername()), keyword, boardCategory, page, pageSize);
     return ResponseEntity.ok(posts);
   }
 }

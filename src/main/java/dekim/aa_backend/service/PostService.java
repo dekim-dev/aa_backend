@@ -247,10 +247,10 @@ public class PostService {
     }
   }
 
-  // 제목+본문과 일치하는 검색어로 게시글 검색
-  public Page<PostResponseDTO> searchPosts(Long userId, String keyword, int page, int pageSize) {
+  // 제목+본문+게시판이름과 일치하는 검색어로 게시글 검색
+  public Page<PostResponseDTO> searchPostsByBoard(Long userId, String keyword, String boardCategory, int page, int pageSize) {
     PageRequest pageRequest = PageRequest.of(page, pageSize);
-    Page<Post> postPage = postRepository.searchByTitleOrContent(keyword, pageRequest);
-    return postPage.map(this::convertToDTO);
+    return postRepository.searchByTitleOrContentAndBoard(keyword, boardCategory, pageRequest)
+            .map(this::convertToDTO);
   }
 }
