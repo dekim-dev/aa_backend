@@ -1,9 +1,12 @@
 package dekim.aa_backend.service;
 
+import dekim.aa_backend.dto.AdvertisementDTO;
 import dekim.aa_backend.dto.ClinicDTO;
 import dekim.aa_backend.dto.UserInfoAllDTO;
+import dekim.aa_backend.entity.Advertisement;
 import dekim.aa_backend.entity.Clinic;
 import dekim.aa_backend.entity.User;
+import dekim.aa_backend.persistence.AdvertisementRepository;
 import dekim.aa_backend.persistence.ClinicRepository;
 import dekim.aa_backend.persistence.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -23,7 +26,9 @@ public class AdminService {
 
   private final UserRepository userRepository;
   private final ClinicRepository clinicRepository;
+  private final AdvertisementRepository advertisementRepository;
 
+  // 모든 사용자 정보 조회
   @PreAuthorize("hasRole('ADMIN')")
   public List<UserInfoAllDTO> getAllUserInfo() {
     List<User> userList = userRepository.findAll();
@@ -44,6 +49,8 @@ public class AdminService {
             .isPaidMember(user.getIsPaidMember())
             .build();
   }
+
+  // 회원 삭제
   @PreAuthorize("hasRole('ADMIN')")
   public void deleteMultipleUsers(List<Long> userIds) {
     for (Long userId : userIds) {
@@ -51,6 +58,7 @@ public class AdminService {
     }
   }
 
+  // 회원 정보 수정
   @PreAuthorize("hasRole('ADMIN')")
   public void updateUserInfo(UserInfoAllDTO userInfoAllDTO) {
     Optional<User> optionalUser = userRepository.findById(userInfoAllDTO.getId());
@@ -71,12 +79,14 @@ public class AdminService {
     }
   }
 
+  // 병원 등록
   @PreAuthorize("hasRole('ADMIN')")
   public Clinic registerClinic(ClinicDTO clinicDTO) {
     Clinic clinic = convertToClinic(clinicDTO);
     return clinicRepository.save(clinic);
   }
 
+  // 병원 정보 수정
   @PreAuthorize("hasRole('ADMIN')")
   public Clinic updateClinic(Long clinicId, ClinicDTO clinicDTO) {
     Clinic existingClinic = clinicRepository.findById(clinicId)
@@ -94,6 +104,7 @@ public class AdminService {
     return clinicRepository.save(existingClinic);
   }
 
+  // 병원 삭제
   @PreAuthorize("hasRole('ADMIN')")
   public void deleteClinic(Long clinicId) {
     clinicRepository.deleteById(clinicId);
@@ -112,4 +123,37 @@ public class AdminService {
             .scheduleJson(clinicDTO.getScheduleJson())
             .build();
   }
+
+  // 광고 등록
+  @PreAuthorize("hasRole('ADMIN')")
+  public Advertisement registerAdvertisement(Advertisement advertisement) {
+    return advertisementRepository.save(advertisement);
+  }
+
+  // 광고 조회 (모든 광고)
+  @PreAuthorize("hasRole('ADMIN')")
+  public List<Advertisement> getAdvertisement() {
+    return advertisementRepository.findAll();
+  }
+
+  // 광고 수정
+  @PreAuthorize("hasRole('ADMIN')")
+  public Advertisement updateAdvertisement(Long id, AdvertisementDTO advertisementDTO) {
+
+    Advertisement updatedAd = advertisementRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Ad Id" + id + "was not found"));
+
+    updatedAd.setAdvertiser(advertisementDTO.getAdvertiser());
+    updatedAd.setImgUrl(advertisementDTO.getImgUrl());
+    updatedAd.setExpiresOn(advertisementDTO.getExpiresOn());
+    return advertisementRepository.save(updatedAd);
+  }
+
+  // 광고 삭제
+  @PreAuthorize("hasRole('ADMIN')")
+  public void deleteAdvertisement(Long id) {
+    advertisementRepository.deleteById(id);
+  }
+
+
 }
