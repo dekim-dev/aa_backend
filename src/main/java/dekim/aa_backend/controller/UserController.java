@@ -74,7 +74,7 @@ public class UserController {
     }
 
     @PutMapping("/nickname")
-    public ResponseEntity<UserInfoAllDTO> updateUserInfo(@AuthenticationPrincipal UserDetails userDetails, @RequestBody Map<String, String> requestBody) {
+    public ResponseEntity<?> updateUserInfo(@AuthenticationPrincipal UserDetails userDetails, @RequestBody Map<String, String> requestBody) {
         String newNickname = requestBody.get("newNickname");
         UserInfoAllDTO updatedUserInfo = userService.updateUserNickname(
                 Long.valueOf(userDetails.getUsername()), newNickname);

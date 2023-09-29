@@ -1,5 +1,7 @@
 package dekim.aa_backend.dto;
 
+import dekim.aa_backend.constant.Authority;
+import dekim.aa_backend.constant.IsPaidMember;
 import dekim.aa_backend.entity.User;
 import lombok.*;
 
@@ -10,9 +12,11 @@ public class UserInfoDTO {
 
     private Long id;
     private String pfImg;
+    private Authority authority;
+    private IsPaidMember isPaidMember;
 
     public static UserInfoDTO of(User user) {
-        return new UserInfoDTO(user.getId(), user.getPfImg());
+        return new UserInfoDTO(user.getId(), user.getPfImg(), user.getAuthority(), user.getIsPaidMember());
     }
 }
 
