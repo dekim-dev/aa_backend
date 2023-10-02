@@ -2,13 +2,11 @@ package dekim.aa_backend.service;
 
 import dekim.aa_backend.dto.CommentDTO;
 import dekim.aa_backend.dto.PostResponseDTO;
+import dekim.aa_backend.dto.ReportRequestDTO;
 import dekim.aa_backend.dto.UserInfoAllDTO;
-import dekim.aa_backend.entity.Comment;
-import dekim.aa_backend.entity.Post;
-import dekim.aa_backend.entity.User;
-import dekim.aa_backend.persistence.CommentRepository;
-import dekim.aa_backend.persistence.PostRepository;
-import dekim.aa_backend.persistence.UserRepository;
+import dekim.aa_backend.entity.*;
+import dekim.aa_backend.persistence.*;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,6 +27,10 @@ public class UserService {
   PostRepository postRepository;
   @Autowired
   CommentRepository commentRepository;
+  @Autowired
+  UserBlockRepository userBlockRepository;
+  @Autowired
+  UserReportRepository userReportRepository;
 
   // 내 글 보기
   public Page<PostResponseDTO> getUserPost(Long userId, int page, int pageSize) {
@@ -174,5 +176,74 @@ public class UserService {
       throw new RuntimeException("User not found");
     }
     userRepository.deleteById(userId);
+  }
+
+  // 회원 차단
+  public void blockUser(Long userId, Long blockedUserId) {
+
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    User blockedUser = userRepository.findById(blockedUserId)
+            .orElseThrow(() -> new IllegalArgumentException("User not found :" + blockedUserId));
+
+    if(user.equals(blockedUser)) {
+      throw new IllegalArgumentException("You cannot block yourself.");
+    }
+
+    boolean isBlockedAlready = userBlockRepository.findByBlockerAndBlockedUser(user, blockedUser).isPresent();
+    if(isBlockedAlready) {
+      throw new IllegalArgumentException("You've already blocked this user.");
+    }
+
+    UserBlock userBlock = new UserBlock();
+    userBlock.setBlocker(user);
+    userBlock.setBlockedUser(blockedUser);
+    userBlockRepository.save(userBlock);
+  }
+
+  // 회원 차단 해제
+  public void unblockUser(Long userId, Long blockedUserId) {
+
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    User blockedUser = userRepository.findById(blockedUserId)
+            .orElseThrow(() -> new IllegalArgumentException("User not found :" + blockedUserId));
+
+    UserBlock userBlock = userBlockRepository.findByBlockerAndBlockedUser(user, blockedUser)
+            .orElseThrow(() -> new IllegalArgumentException("You've not blocked this user."));
+    userBlockRepository.delete(userBlock);
+  }
+
+  // 회원 신고
+  public void reportUser(Long userId, ReportRequestDTO reportRequestDTO) {
+
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    User reportedUser = userRepository.findById(reportRequestDTO.getReportedUserId())
+            .orElseThrow(() -> new IllegalArgumentException("User not found :" + reportRequestDTO.getReportedUserId()));
+
+    if(user.equals(reportedUser)) {
+      throw new IllegalArgumentException("You cannot block yourself.");
+    }
+
+    UserReport userBlock = new UserReport();
+    userBlock.setReporter(user);
+    userBlock.setReportedUser(reportedUser);
+    userBlock.setContent(reportRequestDTO.getContent());
+    userBlock.setReportDate(reportRequestDTO.getReportDate());
+    userReportRepository.save(userBlock);
+  }
+
+  // 회원 신고
+  public void cancelReportUser(Long userId, Long reportId) {
+
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    UserReport userReport = userReportRepository.findById(reportId)
+            .orElseThrow(() -> new EntityNotFoundException("Report not found"));
+
+    if(user.equals(userReport.getReporter())) {
+      userReportRepository.delete(userReport);
+    }
   }
 }

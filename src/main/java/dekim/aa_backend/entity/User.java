@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.cglib.core.Block;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -85,6 +86,19 @@ public class User {
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   private Set<ClinicRecommendation> recommendations = new HashSet<>();
+
+  @OneToMany(mappedBy = "blocker", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  private List<UserBlock> blockedUsers = new ArrayList<>();
+
+  @OneToMany(mappedBy = "blockedUser", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  private List<UserBlock> blockUsers = new ArrayList<>();
+
+  @OneToMany(mappedBy = "reporter", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  private List<UserReport> reportedUsers = new ArrayList<>();
+
+  @OneToMany(mappedBy = "reportedUser", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  private List<UserReport> reportUsers = new ArrayList<>();
+
 }
 
 // 📌연관 관계의 주인이 아닌 객체에서 mappedBy 속성을 사용해서 주인을 지정해줘야 하고, 연관관계의 주인은 항상 N

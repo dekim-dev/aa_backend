@@ -2,6 +2,7 @@ package dekim.aa_backend.controller;
 
 import dekim.aa_backend.dto.CommentDTO;
 import dekim.aa_backend.dto.PostResponseDTO;
+import dekim.aa_backend.dto.ReportRequestDTO;
 import dekim.aa_backend.dto.UserInfoAllDTO;
 import dekim.aa_backend.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -93,5 +94,33 @@ public class UserController {
     public ResponseEntity<String> deleteUser(@AuthenticationPrincipal UserDetails userDetails) {
         userService.deleteUser(Long.valueOf(userDetails.getUsername()));
         return new ResponseEntity<>("User deleted successfully", HttpStatus.OK);
+    }
+
+    // 회원 차단
+    @PostMapping("/block/{blockedUserId}")
+    public ResponseEntity<?> blockUser(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long blockedUserId) {
+        userService.blockUser(Long.valueOf(userDetails.getUsername()), blockedUserId);
+        return new ResponseEntity<>("회원 차단 완료", HttpStatus.OK);
+    }
+
+    // 회원 차단 해제
+    @DeleteMapping("/block/{blockedUserId}")
+    public ResponseEntity<?> unblockUser(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long blockedUserId) {
+        userService.unblockUser(Long.valueOf(userDetails.getUsername()), blockedUserId);
+        return new ResponseEntity<>("회원 차단해제 완료", HttpStatus.OK);
+    }
+
+    // 회원 신고
+    @PostMapping("/report")
+    public ResponseEntity<?> reportUser(@AuthenticationPrincipal UserDetails userDetails, @RequestBody ReportRequestDTO reportRequestDTO) {
+        userService.reportUser(Long.valueOf(userDetails.getUsername()), reportRequestDTO);
+        return new ResponseEntity<>("회원 신고 완료", HttpStatus.OK);
+    }
+
+    // 회원 신고 취소(삭제)
+    @DeleteMapping("/report/{reportId}")
+    public ResponseEntity<?> cancelReportUser(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long reportId) {
+        userService.cancelReportUser(Long.valueOf(userDetails.getUsername()), reportId);
+        return new ResponseEntity<>("회원 신고 취소 완료", HttpStatus.OK);
     }
 }
