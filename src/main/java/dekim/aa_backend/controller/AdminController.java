@@ -1,12 +1,13 @@
 package dekim.aa_backend.controller;
 
-import dekim.aa_backend.dto.AdvertisementDTO;
-import dekim.aa_backend.dto.ClinicDTO;
-import dekim.aa_backend.dto.UserInfoAllDTO;
+import dekim.aa_backend.dto.*;
 import dekim.aa_backend.entity.Advertisement;
 import dekim.aa_backend.entity.Clinic;
+import dekim.aa_backend.entity.Comment;
+import dekim.aa_backend.entity.Post;
 import dekim.aa_backend.service.AdminService;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/admin")
 @PreAuthorize("hasRole('ADMIN')")
+@Slf4j
 public class AdminController {
 
   @Autowired
@@ -108,6 +110,57 @@ public class AdminController {
       return new ResponseEntity<>("광고 삭제 실패: " + e.getMessage(), HttpStatus.NOT_FOUND);
     } catch (Exception e) {
       return new ResponseEntity<>("광고 삭제 실패: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  // 게시글 조회 (모든 게시글)
+  @GetMapping("/post")
+  public ResponseEntity<?> getAllPosts(@RequestParam(defaultValue = "0") int page,
+                                     @RequestParam(defaultValue = "10") int pageSize) {
+    try {
+      Page<PostResponseDTO> postPage = adminService.getAllPosts(PageRequest.of(page, pageSize));
+      log.info("🟢postPage: " + postPage);
+      return ResponseEntity.ok(postPage);
+    } catch (Exception e) {
+      return new ResponseEntity<>("게시글 조회 실패: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  // 게시글 삭제
+  @DeleteMapping("/post")
+  public ResponseEntity<?> deletePosts(@RequestBody List<Long> ids) {
+    try {
+      adminService.deletePosts(ids);
+      return ResponseEntity.ok("게시글 삭제 성공");
+    } catch (EntityNotFoundException e) {
+      return new ResponseEntity<>("존재하지 않는 게시글: " + e.getMessage(), HttpStatus.NOT_FOUND);
+    } catch (Exception e) {
+      return new ResponseEntity<>("게시글 삭제 실패: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  // 댓글 조회 (모든 댓글)
+  @GetMapping("/comment")
+  public ResponseEntity<?> getAllComments(@RequestParam(defaultValue = "0") int page,
+                                       @RequestParam(defaultValue = "10") int pageSize) {
+    try {
+      Page<CommentDTO> commentPage = adminService.getAllComments(PageRequest.of(page, pageSize));
+      return ResponseEntity.ok(commentPage);
+    } catch (Exception e) {
+      return new ResponseEntity<>("댓글 조회 실패: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  // 댓글 삭제
+  @DeleteMapping("/comment")
+  public ResponseEntity<?> deleteComments(@RequestBody List<Long> ids) {
+    try {
+      adminService.deleteComments(ids);
+      return ResponseEntity.ok("댓글 삭제 성공");
+    } catch (EntityNotFoundException e) {
+      return new ResponseEntity<>("존재하지 않는 댓글: " + e.getMessage(), HttpStatus.NOT_FOUND);
+    } catch (Exception e) {
+      return new ResponseEntity<>("댓글 삭제 실패: " + e.getMessage(), HttpStatus.BAD_REQUEST);
     }
   }
 

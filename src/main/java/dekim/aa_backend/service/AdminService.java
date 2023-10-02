@@ -1,14 +1,8 @@
 package dekim.aa_backend.service;
 
-import dekim.aa_backend.dto.AdvertisementDTO;
-import dekim.aa_backend.dto.ClinicDTO;
-import dekim.aa_backend.dto.UserInfoAllDTO;
-import dekim.aa_backend.entity.Advertisement;
-import dekim.aa_backend.entity.Clinic;
-import dekim.aa_backend.entity.User;
-import dekim.aa_backend.persistence.AdvertisementRepository;
-import dekim.aa_backend.persistence.ClinicRepository;
-import dekim.aa_backend.persistence.UserRepository;
+import dekim.aa_backend.dto.*;
+import dekim.aa_backend.entity.*;
+import dekim.aa_backend.persistence.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,6 +25,9 @@ public class AdminService {
   private final UserRepository userRepository;
   private final ClinicRepository clinicRepository;
   private final AdvertisementRepository advertisementRepository;
+  private final PostRepository postRepository;
+  private final CommentRepository commentRepository;
+  private final PostService postService;
 
   // 모든 사용자 정보 조회
   @PreAuthorize("hasRole('ADMIN')")
@@ -161,6 +159,95 @@ public class AdminService {
   public void deleteAdvertisement(List<Long> ids) {
     for (Long id : ids) {
       advertisementRepository.deleteById(id);
+    }
+  }
+
+  // 게시글 조회 (모든 게시글)
+  @PreAuthorize("hasRole('ADMIN')")
+  public Page<PostResponseDTO> getAllPosts(Pageable pageable) {
+    Page<Post> postPage = postRepository.findAll(pageable);
+    Page<PostResponseDTO> postResponseDTOPage = postPage.map(this::convertToPostResponseDTO);
+    return postResponseDTOPage;
+  }
+  private PostResponseDTO convertToPostResponseDTO(Post post) {
+    // 댓글에서 유저의 정보를 사용하기 위해 commentDTO 사용 -> @JsonIgnore..
+    List<CommentDTO> commentDTOList;
+    if (post.getComments() != null && !post.getComments().isEmpty()) {
+      commentDTOList = post.getComments().stream()
+              .map(comment -> CommentDTO.builder()
+                      .id(comment.getId())
+                      .nickname(comment.getUser().getNickname())
+                      .content(comment.getContent())
+                      .createdAt(comment.getCreatedAt())
+                      .updatedAt(comment.getUpdatedAt())
+                      .userId(comment.getUser().getId())
+                      .build())
+              .toList();
+    } else {
+      commentDTOList = Collections.emptyList();  // 댓글이 없을경우 emptyList 로 성정
+    }
+    return PostResponseDTO.builder()
+            .id(post.getId())
+            .boardCategory(post.getBoardCategory())
+            .topic(post.getTopic())
+            .title(post.getTitle())
+            .content(post.getContent())
+            .imgUrl(post.getImgUrl())
+            .viewCount(post.getViewCount())
+            .likesCount(post.getLikes().size())
+            .createdAt(post.getCreatedAt())
+            .updatedAt(post.getUpdatedAt())
+            .nickname(post.getUser().getNickname())
+            .userId(post.getUser().getId())
+            .pfImg(post.getUser().getPfImg())
+            .commentsDTO(commentDTOList)
+            .likes(post.getLikes())
+            .build();
+  }
+
+  // 게시글 삭제
+  @PreAuthorize("hasRole('ADMIN')")
+  public void deletePosts(List<Long> ids) {
+    for (Long id : ids) {
+      postRepository.deleteById(id);
+    }
+  }
+
+  // 댓글 조회 (모든 댓글)
+  @PreAuthorize("hasRole('ADMIN')")
+  public Page<CommentDTO> getAllComments(Pageable pageable) {
+   Page<Comment> commentPage = commentRepository.findAll(pageable);
+   Page<CommentDTO> commentDTOPage = commentPage.map(this::mapToDto);
+  return commentDTOPage;
+  }
+  public CommentDTO mapToDto(Comment comment) {
+    CommentDTO dto = new CommentDTO();
+    dto.setId(comment.getId());
+    dto.setNickname(comment.getUser().getNickname());
+    dto.setContent(comment.getContent());
+    dto.setCreatedAt(comment.getCreatedAt());
+    dto.setUpdatedAt(comment.getUpdatedAt());
+    dto.setUserId(comment.getUser().getId());
+    dto.setPfImg(comment.getUser().getPfImg());
+    if (comment.getPost() != null) {
+      dto.setPostId(comment.getPost().getId());
+      dto.setPostTitle(comment.getPost().getTitle());
+      dto.setPostBoard(comment.getPost().getBoardCategory());
+      dto.setPostTopic(comment.getPost().getTopic());
+      dto.setLikesCount(comment.getPost().getLikes().size());
+    }
+    if (comment.getClinic() != null) {
+      dto.setClinicId(comment.getClinic().getId());
+      dto.setClinicName(comment.getClinic().getName());
+    }
+    return dto;
+  }
+
+// 댓글 삭제
+  @PreAuthorize("hasRole('ADMIN')")
+  public void deleteComments(List<Long> ids) {
+    for (Long id : ids) {
+      commentRepository.deleteById(id);
     }
   }
 }
