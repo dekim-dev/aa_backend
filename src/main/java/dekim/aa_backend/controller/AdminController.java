@@ -8,6 +8,8 @@ import dekim.aa_backend.entity.Clinic;
 import dekim.aa_backend.service.AdminService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,8 +26,9 @@ public class AdminController {
   AdminService adminService;
 
   @GetMapping("/users")
-  public ResponseEntity<List<UserInfoAllDTO>> getAllUsers() {
-    List<UserInfoAllDTO> userInfoList = adminService.getAllUserInfo();
+  public ResponseEntity<Page<UserInfoAllDTO>> getAllUsers(@RequestParam(defaultValue = "0") int page,
+                                                          @RequestParam(defaultValue = "10") int pageSize) {
+    Page<UserInfoAllDTO> userInfoList = adminService.getAllUserInfo(PageRequest.of(page, pageSize));
     return ResponseEntity.ok(userInfoList);
   }
 
@@ -44,7 +47,7 @@ public class AdminController {
   @PostMapping("/clinic")
   public ResponseEntity<Clinic> registerClinic(@RequestBody ClinicDTO clinicDTO) {
     Clinic clinic = adminService.registerClinic(clinicDTO);
-    return ResponseEntity.ok(clinic);
+    return new ResponseEntity<>(clinic, HttpStatus.OK);
   }
 
   @PutMapping("/clinic/{clinicId}")
@@ -53,9 +56,9 @@ public class AdminController {
     return ResponseEntity.ok(updatedClinic);
   }
 
-  @DeleteMapping("/clinic/{clinicId}")
-  public ResponseEntity<String> deleteClinic(@PathVariable Long clinicId) {
-    adminService.deleteClinic(clinicId);
+  @DeleteMapping("/clinic")
+  public ResponseEntity<String> deleteClinic(@RequestBody List<Long> clinicIds) {
+    adminService.deleteClinic(clinicIds);
     return ResponseEntity.ok("Clinic deleted successfully.");
   }
 
@@ -72,9 +75,10 @@ public class AdminController {
 
   // 광고 조회 (모든 광고)
   @GetMapping("/advertisement")
-  public ResponseEntity<?> getAllAds() {
+  public ResponseEntity<?> getAllAds(@RequestParam(defaultValue = "0") int page,
+                                     @RequestParam(defaultValue = "10") int pageSize) {
     try {
-      List<Advertisement> advertisementList = adminService.getAdvertisement();
+      Page<Advertisement> advertisementList = adminService.getAdvertisement(PageRequest.of(page, pageSize));
       return ResponseEntity.ok(advertisementList);
     } catch (Exception e) {
       return new ResponseEntity<>("광고 조회 실패: " + e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -95,10 +99,10 @@ public class AdminController {
   }
 
   // 광고 삭제
-  @DeleteMapping("/advertisement/{id}")
-  public ResponseEntity<?> deleteAd(@PathVariable Long id) {
+  @DeleteMapping("/advertisement")
+  public ResponseEntity<?> deleteAd(@RequestBody List<Long> ids) {
     try {
-      adminService.deleteAdvertisement(id);
+      adminService.deleteAdvertisement(ids);
       return ResponseEntity.ok("광고 삭제 성공");
     } catch (EntityNotFoundException e) {
       return new ResponseEntity<>("광고 삭제 실패: " + e.getMessage(), HttpStatus.NOT_FOUND);

@@ -7,7 +7,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration // 스프링 빈으로 등록
 public class WebMvcConfig implements WebMvcConfigurer {
-    private final long MAX_AGE_SECS = 1800;
+//    private final long MAX_AGE_SECS = 1800;
 
     @Value("${custom.allowed-origin}")
     private String allowedOrigin;
@@ -20,8 +20,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .allowedOrigins(allowedOrigin)
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
-                .allowCredentials(true)
-                .maxAge(MAX_AGE_SECS);
+                .allowCredentials(true);
+//                .maxAge(MAX_AGE_SECS);
     }
 }
 

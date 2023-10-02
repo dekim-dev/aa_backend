@@ -1,6 +1,8 @@
 package dekim.aa_backend.controller;
 
+import dekim.aa_backend.dto.AdvertisementDTO;
 import dekim.aa_backend.dto.UserInfoDTO;
+import dekim.aa_backend.entity.Advertisement;
 import dekim.aa_backend.entity.Diary;
 import dekim.aa_backend.service.MainService;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,21 @@ public class MainController {
             return new ResponseEntity<>(userInfo, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("회원정보 조회 실패", HttpStatus.NOT_FOUND);
+        }
+    }
+
+    // 광고
+    @GetMapping("/ads")
+    public ResponseEntity<?> getAllAdvertisements(@AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            if (userDetails == null) {
+                // 사용자 정보가 없는 경우 처리
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+            }
+            List<AdvertisementDTO> advertisementDTOS = mainService.getAllAdvertisements(Long.valueOf(userDetails.getUsername()));
+            return new ResponseEntity<>(advertisementDTOS, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("광고 조회 실패", HttpStatus.NOT_FOUND);
         }
     }
 }

@@ -12,6 +12,9 @@ import dekim.aa_backend.persistence.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -30,13 +33,15 @@ public class AdminService {
 
   // 모든 사용자 정보 조회
   @PreAuthorize("hasRole('ADMIN')")
-  public List<UserInfoAllDTO> getAllUserInfo() {
-    List<User> userList = userRepository.findAll();
+  public Page<UserInfoAllDTO> getAllUserInfo(Pageable pageable) {
+    Page<User> userList = userRepository.findAll(pageable);
     // 관리자를 제외한 사용자 정보만 반환
-    return userList.stream()
+    List<UserInfoAllDTO> userInfoList = userList.stream()
             .filter(user -> !user.getAuthority().name().contains("ADMIN"))
             .map(this::convertToUserInfoAllDTO)
             .collect(Collectors.toList());
+
+    return new PageImpl<>(userInfoList, pageable, userList.getTotalElements());
   }
 
   private UserInfoAllDTO convertToUserInfoAllDTO(User user) {
@@ -106,8 +111,10 @@ public class AdminService {
 
   // 병원 삭제
   @PreAuthorize("hasRole('ADMIN')")
-  public void deleteClinic(Long clinicId) {
-    clinicRepository.deleteById(clinicId);
+  public void deleteClinic(List<Long> clinicIds) {
+    for (Long clinicId : clinicIds) {
+      clinicRepository.deleteById(clinicId);
+    }
   }
 
   private Clinic convertToClinic(ClinicDTO clinicDTO) {
@@ -132,8 +139,8 @@ public class AdminService {
 
   // 광고 조회 (모든 광고)
   @PreAuthorize("hasRole('ADMIN')")
-  public List<Advertisement> getAdvertisement() {
-    return advertisementRepository.findAll();
+  public Page<Advertisement> getAdvertisement(Pageable pageable) {
+    return advertisementRepository.findAll(pageable);
   }
 
   // 광고 수정
@@ -151,9 +158,9 @@ public class AdminService {
 
   // 광고 삭제
   @PreAuthorize("hasRole('ADMIN')")
-  public void deleteAdvertisement(Long id) {
-    advertisementRepository.deleteById(id);
+  public void deleteAdvertisement(List<Long> ids) {
+    for (Long id : ids) {
+      advertisementRepository.deleteById(id);
+    }
   }
-
-
 }
