@@ -32,7 +32,7 @@ public class WebSecurityConfig {
                     .requestMatchers(HttpMethod.OPTIONS).permitAll() // OPTIONS 요청 허용
                     .requestMatchers("/auth/**").permitAll()
                     .requestMatchers("/admin/**").hasRole("ADMIN")
-                    .anyRequest().authenticated()
+                    .anyRequest().permitAll()
             )
 
             .exceptionHandling(customizer -> customizer
