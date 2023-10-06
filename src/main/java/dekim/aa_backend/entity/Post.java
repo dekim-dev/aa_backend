@@ -57,6 +57,9 @@ public class Post {
   @Column
   private LocalDateTime updatedAt;
 
+  @Column
+  private int reportCount = 0;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "userNo") // userNo 컬럼을 사용하여 연관 관계 설정
   @JsonIgnore
@@ -68,4 +71,7 @@ public class Post {
 
   @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   private Set<Likes> likes = new HashSet<>();
+
+  @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  private Set<PostReport> reports = new HashSet<>();
 }

@@ -5,14 +5,13 @@ import dekim.aa_backend.dto.PostResponseDTO;
 import dekim.aa_backend.dto.ReportRequestDTO;
 import dekim.aa_backend.dto.UserInfoAllDTO;
 import dekim.aa_backend.entity.*;
+import dekim.aa_backend.exception.DuplicatePostReportException;
 import dekim.aa_backend.persistence.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,6 +30,8 @@ public class UserService {
   UserBlockRepository userBlockRepository;
   @Autowired
   UserReportRepository userReportRepository;
+  @Autowired
+  PostReportRepository postReportRepository;
 
   // 내 글 보기
   public Page<PostResponseDTO> getUserPost(Long userId, int page, int pageSize) {
@@ -56,7 +57,6 @@ public class UserService {
               .nickname(post.getUser().getNickname())
               .userId(post.getUser().getId())
               .pfImg(post.getUser().getPfImg())
-              // Map other fields as needed
               .build();
     });
   }
@@ -246,4 +246,40 @@ public class UserService {
       userReportRepository.delete(userReport);
     }
   }
+
+  // 게시글 신고
+  public void reportPost(Long userId, Long postId) {
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    Post post = postRepository.findById(postId)
+            .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+
+    Optional<PostReport> reportedPostOptional = postReportRepository.findByUserAndPost(user, post);
+    if (reportedPostOptional.isPresent()) {
+      post.setReportCount(post.getReportCount() - 1);
+
+      PostReport reportedPost = reportedPostOptional.get();
+      postReportRepository.delete(reportedPost);
+      throw new DuplicatePostReportException("게시글 신고를 취소하였습니다.");
+    }
+
+    if (user.getId().equals(post.getUser().getId())) {
+      throw new IllegalArgumentException("You cannot report your own post.");
+    } else {
+      post.setReportCount(post.getReportCount() + 1);
+      postRepository.save(post);
+
+      // 게시글 신고 정보 저장
+      PostReport postReport = new PostReport();
+      postReport.setUser(user);
+      postReport.setPost(post);
+      postReportRepository.save(postReport);
+
+      if (post.getReportCount() >= 3) {
+        // 게시글이 3회 이상 누적시 게시글 삭제 처리
+        postRepository.delete(post);
+      }
+    }
+  }
+
 }

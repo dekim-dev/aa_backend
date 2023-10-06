@@ -4,6 +4,7 @@ import dekim.aa_backend.dto.CommentDTO;
 import dekim.aa_backend.dto.PostResponseDTO;
 import dekim.aa_backend.dto.ReportRequestDTO;
 import dekim.aa_backend.dto.UserInfoAllDTO;
+import dekim.aa_backend.exception.DuplicatePostReportException;
 import dekim.aa_backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -46,8 +47,8 @@ public class UserController {
 
     @GetMapping("/comments")
     public ResponseEntity<?> getUserComments(@AuthenticationPrincipal UserDetails userDetails,
-                                          @RequestParam(defaultValue = "0") int page,
-                                          @RequestParam(defaultValue = "10") int pageSize) {
+                                             @RequestParam(defaultValue = "0") int page,
+                                             @RequestParam(defaultValue = "10") int pageSize) {
         if (userDetails == null) { // 사용자 정보가 없는 경우 처리
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
@@ -122,5 +123,18 @@ public class UserController {
     public ResponseEntity<?> cancelReportUser(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long reportId) {
         userService.cancelReportUser(Long.valueOf(userDetails.getUsername()), reportId);
         return new ResponseEntity<>("회원 신고 취소 완료", HttpStatus.OK);
+    }
+
+    // 게시글 신고/취소
+    @PutMapping("/post/{postId}/report")
+    public ResponseEntity<?> reportPost(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long postId) {
+        try {
+            userService.reportPost(Long.valueOf(userDetails.getUsername()), postId);
+            return new ResponseEntity<>("게시글 신고 완료", HttpStatus.OK);
+        } catch (DuplicatePostReportException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.ACCEPTED);
+        } catch (IllegalArgumentException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 }

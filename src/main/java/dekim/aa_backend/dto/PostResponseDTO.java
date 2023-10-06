@@ -28,4 +28,5 @@ public class PostResponseDTO {
   private String pfImg;
   private List<CommentDTO> commentsDTO; // 회원 정보를 받아오기 위해 DTO 로 받기
   private Set<Likes> likes;
+  private int reportCount;
 }

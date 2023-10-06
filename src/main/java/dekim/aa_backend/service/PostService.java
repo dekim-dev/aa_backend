@@ -136,6 +136,7 @@ public class PostService {
             .pfImg(post.getUser().getPfImg())
             .commentsDTO(commentDTOList) // 댓글 정보를 CommentDTO의 리스트로 설정
             .likes(post.getLikes())
+            .reportCount(post.getReportCount())
             .build();
   }
 
