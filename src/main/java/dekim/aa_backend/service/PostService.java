@@ -254,4 +254,14 @@ public class PostService {
     return postRepository.searchByTitleOrContentAndBoard(keyword, boardCategory, pageRequest)
             .map(this::convertToDTO);
   }
+
+  // 추천수 10이상인 게시글 -> 베스트 게시판으로
+  public Page<PostResponseDTO> getPopularPosts(Long userId, int page, int pageSize) {
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    PageRequest pageRequest = PageRequest.of(page, pageSize);
+
+    return postRepository.findByLikesCountGreaterThanEqual(10,pageRequest)
+            .map(this::convertToDTO);
+  }
 }

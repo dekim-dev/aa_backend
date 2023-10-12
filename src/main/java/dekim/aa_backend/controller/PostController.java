@@ -185,4 +185,13 @@ public class PostController {
             Long.valueOf(userDetails.getUsername()), keyword, boardCategory, page, pageSize);
     return ResponseEntity.ok(posts);
   }
+
+  // 추천수 10이상인 게시글 -> 베스트 게시판으로
+  @GetMapping("/popular")
+  public Page<PostResponseDTO> getPopularPosts(
+          @AuthenticationPrincipal UserDetails userDetails,
+          @RequestParam(defaultValue = "0") int page,
+          @RequestParam(defaultValue = "10") int pageSize) {
+    return postService.getPopularPosts(Long.valueOf(userDetails.getUsername()), page, pageSize);
+  }
 }
