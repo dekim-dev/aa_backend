@@ -45,4 +45,14 @@ public class DiaryController {
         }
     }
 
+    @GetMapping("/latest")
+    public ResponseEntity<?> fetchLatestThreeDiaries(@AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            List<Diary> diaryList = diaryService.fetchLatestThreeDiaries(Long.valueOf(userDetails.getUsername()));
+            return new ResponseEntity<>(diaryList, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("다이어리 조회 실패", HttpStatus.NOT_FOUND);
+        }
+    }
+
 }

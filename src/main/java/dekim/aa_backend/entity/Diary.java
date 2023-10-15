@@ -7,6 +7,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -32,6 +34,17 @@ public class Diary {
   @CreatedDate
   @Column
   private LocalDateTime createdAt;
+
+  @ElementCollection
+  private List<String> med;
+
+  @ElementCollection
+  private List<LocalTime> takenAt;
+
+  @ElementCollection
+  @CollectionTable(name = "MEDICATIONS", joinColumns = @JoinColumn(name = "diary_id"))
+  @Column(name = "medication")
+  private List<String> medications;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "userNo")

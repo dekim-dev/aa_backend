@@ -43,6 +43,18 @@ public class DiaryService {
 
         return diaryList;
     }
+    public List<Diary> fetchLatestThreeDiaries(Long userId) {
+        // 사용자의 정보 확인
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (!userOptional.isPresent()) {
+            throw new RuntimeException("User not found");
+        }
+        User user = userOptional.get();
+        // 사용자와 관련된 다이어리만 조회
+        List<Diary> diaryList = diaryRepository.findTop3ByUserOrderByCreatedAtDesc(user);
+
+        return diaryList;
+    }
 
 
 

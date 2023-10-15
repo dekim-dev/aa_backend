@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface DiaryRepository extends JpaRepository<Diary, Long> {
     List<Diary> findByUser(User user);
+    List<Diary> findTop3ByUserOrderByCreatedAtDesc(User user);
+
 }
