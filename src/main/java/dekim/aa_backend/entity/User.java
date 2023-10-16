@@ -57,10 +57,11 @@ public class User {
 
 
   @Builder
-  public User(String email, String password, String nickname, Authority authority) {
+  public User(String email, String password, String nickname, String authKey, Authority authority) {
     this.email = email;
     this.password = password;
     this.nickname = nickname;
+    this.authKey = authKey;
     this.authority = authority;
     this.isActive = IsActive.INACTIVE;
     this.isPaidMember = IsPaidMember.UNPAID;

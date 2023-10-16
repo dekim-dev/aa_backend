@@ -5,6 +5,7 @@ import dekim.aa_backend.dto.TokenRequestDTO;
 import dekim.aa_backend.dto.UserRequestDTO;
 import dekim.aa_backend.dto.UserResponseDTO;
 import dekim.aa_backend.service.AuthService;
+import dekim.aa_backend.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
+    private final EmailService emailService;
 
     @PostMapping("/signup")
     public ResponseEntity<UserResponseDTO> signup(@RequestBody UserRequestDTO userRequestDTO) {
@@ -57,6 +59,18 @@ public class AuthController {
     @GetMapping("/email")
     public boolean isEmailExists(@RequestParam String email) {
         return authService.isEmailExists(email);
+    }
+
+
+    // 회원가입 - 이메일 인증 (인증키 확인)
+    @PostMapping("/email_auth")
+    public ResponseEntity<Boolean> checkMailWithAuthKey(@RequestParam("email") String email, @RequestParam("authKey") String authKey) throws Exception {
+        try {
+            authService.checkEmailWithAuthKey(email, authKey);
+            return new ResponseEntity<>(true, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 }

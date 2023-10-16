@@ -7,6 +7,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserRequestDTO {
@@ -14,12 +15,14 @@ public class UserRequestDTO {
   private String email;
   private String password;
   private String nickname;
+  private String authKey;
 
   public User toUser(PasswordEncoder passwordEncoder) {
     return User.builder()
             .email(email)
             .password(passwordEncoder.encode(password))
             .nickname(nickname)
+            .authKey(authKey)
             .authority(Authority.ROLE_USER)
             .build();
   }

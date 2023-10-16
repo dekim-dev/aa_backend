@@ -1,6 +1,7 @@
 package dekim.aa_backend.service;
 
 import dekim.aa_backend.config.jwt.TokenProvider;
+import dekim.aa_backend.constant.IsActive;
 import dekim.aa_backend.dto.TokenDTO;
 import dekim.aa_backend.dto.TokenRequestDTO;
 import dekim.aa_backend.dto.UserRequestDTO;
@@ -19,6 +20,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -28,13 +31,19 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final EmailService emailService;
 
     @Transactional
     public UserResponseDTO signup(UserRequestDTO userRequestDTO) {
         if (userRepository.existsByEmail(userRequestDTO.getEmail())) {
             throw new RuntimeException("이미 가입되어 있는 유저입니다.");
         }
+        String authKey = emailService.createKey();
+        userRequestDTO.setAuthKey(authKey);
 
+        String emailContent = "안녕하세요. <br /><br />Appropriate Attention 회원가입을 완료하기 위해<br /> 아래 링크를 클릭해 주세요. <br /><br />";
+        emailContent += "<a href=\"http://localhost:8111/auth/email_auth?email=" + userRequestDTO.getEmail() + "&authKey=" + userRequestDTO.getAuthKey() + "\">인증하기</a>";
+        emailService.sendEmailWithLink(userRequestDTO.getEmail(), "[Appropriate Attention] 회원가입 이메일 인증", emailContent);
         User user = userRequestDTO.toUser(passwordEncoder);
         return UserResponseDTO.of(userRepository.save(user));
     }
@@ -117,6 +126,24 @@ public class AuthService {
     // 이메일 중복 확인
     public boolean isEmailExists(String email) {
         return userRepository.existsByEmail(email);
+    }
+
+    // 회원가입 - 이메일 인증 (인증키 확인)
+    public void checkEmailWithAuthKey(String email, String authKey) throws IllegalArgumentException {
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            if (authKey.equals(user.getAuthKey())) {
+                user.setIsActive(IsActive.ACTIVE);
+                user.setAuthKey("");
+                userRepository.save(user);
+                System.out.println("🍒 이메일 인증 완료: " + email);
+            } else {
+                throw new IllegalArgumentException("인증키가 올바르지 않습니다.");
+            }
+        } else {
+            throw new IllegalArgumentException("이메일 주소를 찾을 수 없습니다.: " + email);
+        }
     }
 
 }

@@ -1,0 +1,27 @@
+<!-- error.html  -->
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Email Verification Incomplete</title>
+  <style>
+        body {
+            margin: 50px;
+        }
+        p {
+            color: #2e2e2e;
+            font-size: 1.4rem;
+        }
+        span {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<!-- 이메일 인증 실패 메시지 출력 -->
+<p th:if="${message}" th:text="${message}"></p>
+<p>고객센터로 문의해 주세요: <span>dekim0712@naver.com</span></p>
+
+</body>
+</html>

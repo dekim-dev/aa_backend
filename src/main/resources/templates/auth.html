@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Email Verification Complete</title>
+    <style>
+        body {
+            margin: 50px;
+        }
+        a {
+            text-decoration: none;
+            color: #222222;
+        }
+        .wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .message {
+            color: #222222;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        .close-button {
+            padding: 10px 20px;
+            background-color: #ececec;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .close-button:hover {
+            background-color: gray;
+        }
+    </style>
+    <script type="text/javascript">
+        function closeWindow() {
+            window.close();
+        }
+    </script>
+</head>
+<body>
+<!-- 이메일 인증 완료 메시지 출력 -->
+<div class="wrapper">
+
+    <p th:if="${message}" th:text="${message}" class="message"></p>
+
+    <!-- 창닫기 버튼 -->
+    <button class="close-button"><a href="http://localhost:3000/signin">로그인</a></button>
+
+
+</div>
+</body>
+</html>
