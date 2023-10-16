@@ -9,10 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 @Slf4j
@@ -48,6 +45,18 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("로그아웃에 실패했습니다: " + e.getMessage());
         }
+    }
+
+    // 닉네임 중복 확인
+    @GetMapping("/nickname")
+    public boolean isNicknameExists(@RequestParam String nickname) {
+        return authService.isNicknameExists(nickname);
+    }
+
+    // 이메일 중복 확인
+    @GetMapping("/email")
+    public boolean isEmailExists(@RequestParam String email) {
+        return authService.isEmailExists(email);
     }
 
 }

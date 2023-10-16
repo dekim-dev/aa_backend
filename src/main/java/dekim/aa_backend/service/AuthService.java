@@ -109,4 +109,14 @@ public class AuthService {
         SecurityContextHolder.clearContext();
     }
 
+    // 닉네임 중복 확인
+    public boolean isNicknameExists(String nickname) {
+        return userRepository.existsByNickname(nickname);
+    }
+
+    // 이메일 중복 확인
+    public boolean isEmailExists(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
 }
