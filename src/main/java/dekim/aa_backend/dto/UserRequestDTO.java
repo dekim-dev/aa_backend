@@ -16,12 +16,14 @@ public class UserRequestDTO {
   private String password;
   private String nickname;
   private String authKey;
+  private String pfImg;
 
   public User toUser(PasswordEncoder passwordEncoder) {
     return User.builder()
             .email(email)
             .password(passwordEncoder.encode(password))
             .nickname(nickname)
+            .pfImg("https://firebasestorage.googleapis.com/v0/b/appropriate-attention.appspot.com/o/default_images%2Fdefault_pfImg.svg?alt=media")
             .authKey(authKey)
             .authority(Authority.ROLE_USER)
             .build();
