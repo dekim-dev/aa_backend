@@ -5,9 +5,10 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -33,18 +34,14 @@ public class Diary {
 
   @CreatedDate
   @Column
+  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
   private LocalDateTime createdAt;
 
   @ElementCollection
   private List<String> med;
 
-  @ElementCollection
-  private List<LocalTime> takenAt;
-
-  @ElementCollection
-  @CollectionTable(name = "MEDICATIONS", joinColumns = @JoinColumn(name = "diary_id"))
-  @Column(name = "medication")
-  private List<String> medications;
+  @OneToMany(mappedBy = "diary", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  private List<MedicationList> medicationLists = new ArrayList<>();
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "userNo")

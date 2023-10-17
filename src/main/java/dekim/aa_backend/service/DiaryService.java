@@ -1,6 +1,7 @@
 package dekim.aa_backend.service;
 
 import dekim.aa_backend.entity.Diary;
+import dekim.aa_backend.entity.MedicationList;
 import dekim.aa_backend.entity.User;
 import dekim.aa_backend.persistence.DiaryRepository;
 import dekim.aa_backend.persistence.UserRepository;
@@ -19,7 +20,7 @@ public class DiaryService {
     private UserRepository userRepository;
 
     public Diary createDiary(Diary diary, Long userId) {
-        // 2. 사용자 아이디를 통해 사용자 정보 조회
+        // 1. 사용자 아이디를 통해 사용자 정보 조회
         Optional<User> userOptional = userRepository.findById(userId);
         if (!userOptional.isPresent()) {
             throw new RuntimeException("User not found");
@@ -27,9 +28,19 @@ public class DiaryService {
         User user = userOptional.get();
         diary.setUser(user);
 
+        // 2. MedicationList 목록을 Diary와 연결
+        List<MedicationList> medicationList = diary.getMedicationLists();
+        for (MedicationList medication : medicationList) {
+            medication.setDiary(diary);
+            medication.setUser(user);
+        }
+
+        // 3. Diary 엔티티 저장
         Diary newDiary = diaryRepository.save(diary);
         return newDiary;
     }
+
+
 
     public List<Diary> fetchAllDiaries(Long userId) {
         // 사용자의 정보 확인
