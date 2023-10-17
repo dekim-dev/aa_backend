@@ -8,13 +8,16 @@ import dekim.aa_backend.entity.*;
 import dekim.aa_backend.exception.DuplicatePostReportException;
 import dekim.aa_backend.persistence.*;
 import jakarta.persistence.EntityNotFoundException;
+import org.hibernate.procedure.NoSuchParameterException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -32,6 +35,8 @@ public class UserService {
   UserReportRepository userReportRepository;
   @Autowired
   PostReportRepository postReportRepository;
+  @Autowired
+  PasswordEncoder passwordEncoder;
 
   // 내 글 보기
   public Page<PostResponseDTO> getUserPost(Long userId, int page, int pageSize) {
@@ -151,8 +156,28 @@ public class UserService {
     if (userOptional.isEmpty()) {
       throw new RuntimeException("User not found");
     }
+    boolean isNicknameExists = userRepository.existsByNickname(newNickname);
+    if (isNicknameExists) {
+      throw new IllegalArgumentException("이미 존재하는 닉네임 입니다.");
+    }
     User user = userOptional.get();
     user.setNickname(newNickname);
+    userRepository.save(user);
+    return getUserInfo(userId);
+  }
+
+  // 회원정보 수정 (비밀번호)
+  public UserInfoAllDTO updateUserPwd(Long userId, String newPwd, String conNewPwd) {
+    Optional<User> userOptional = userRepository.findById(userId);
+    if (userOptional.isEmpty()) {
+      throw new RuntimeException("User not found");
+    }
+    if (!Objects.equals(newPwd, conNewPwd)) {
+      throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+    }
+    User user = userOptional.get();
+    String encodedPassword = passwordEncoder.encode(newPwd);
+    user.setPassword(encodedPassword);
     userRepository.save(user);
     return getUserInfo(userId);
   }

@@ -76,11 +76,28 @@ public class UserController {
     }
 
     @PutMapping("/nickname")
-    public ResponseEntity<?> updateUserInfo(@AuthenticationPrincipal UserDetails userDetails, @RequestBody Map<String, String> requestBody) {
-        String newNickname = requestBody.get("newNickname");
-        UserInfoAllDTO updatedUserInfo = userService.updateUserNickname(
-                Long.valueOf(userDetails.getUsername()), newNickname);
-        return new ResponseEntity<>(updatedUserInfo, HttpStatus.OK);
+    public ResponseEntity<?> updateUserNickname(@AuthenticationPrincipal UserDetails userDetails, @RequestBody Map<String, String> requestBody) {
+        try {
+            String newNickname = requestBody.get("newNickname");
+            UserInfoAllDTO updatedUserInfo = userService.updateUserNickname(
+                    Long.valueOf(userDetails.getUsername()), newNickname);
+            return new ResponseEntity<>(updatedUserInfo, HttpStatus.OK);
+        } catch (IllegalArgumentException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PutMapping("/password")
+    public ResponseEntity<?> updateUserPassword(@AuthenticationPrincipal UserDetails userDetails, @RequestBody Map<String, String> requestBody) {
+        try {
+            String newPwd = requestBody.get("newPwd");
+            String conNewPwd = requestBody.get("conNewPwd");
+            UserInfoAllDTO updatedUserInfo = userService.updateUserPwd(
+                    Long.valueOf(userDetails.getUsername()), newPwd, conNewPwd);
+            return new ResponseEntity<>(updatedUserInfo, HttpStatus.OK);
+        } catch (IllegalArgumentException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PutMapping("/pfImg")
