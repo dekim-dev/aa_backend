@@ -6,6 +6,7 @@ import dekim.aa_backend.dto.UserRequestDTO;
 import dekim.aa_backend.dto.UserResponseDTO;
 import dekim.aa_backend.service.AuthService;
 import dekim.aa_backend.service.EmailService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -71,6 +72,18 @@ public class AuthController {
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    // 임시 비밀번호 발급 & 비밀번호 업데이트
+    @GetMapping("/password/{email}")
+    public ResponseEntity<?> sendTempPwd(@PathVariable String email) throws Exception {
+        try {
+            authService.updatePasswordWithAuthKey(email);
+            return new ResponseEntity<>("임시 비밀번호 발급&전송 완료", HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>("가입되어있지 않은 이메일 주소 입니다.", HttpStatus.NOT_FOUND);
+        }
+
     }
 
 }

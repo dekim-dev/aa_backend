@@ -10,6 +10,7 @@ import dekim.aa_backend.entity.RefreshToken;
 import dekim.aa_backend.entity.User;
 import dekim.aa_backend.persistence.RefreshTokenRepository;
 import dekim.aa_backend.persistence.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -137,7 +138,6 @@ public class AuthService {
                 user.setIsActive(IsActive.ACTIVE);
                 user.setAuthKey("");
                 userRepository.save(user);
-                System.out.println("🍒 이메일 인증 완료: " + email);
             } else {
                 throw new IllegalArgumentException("인증키가 올바르지 않습니다.");
             }
@@ -146,4 +146,15 @@ public class AuthService {
         }
     }
 
+    // 비밀번호 재발급 & 비밀번호 업데이트
+    public void updatePasswordWithAuthKey(String email) throws Exception {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User Not Found."));
+        String tempPw = emailService.sendPasswordAuthKey(email);
+
+        // 임시 비밀번호로 업데이트
+        String encodedPassword = passwordEncoder.encode(tempPw);
+        user.setPassword(encodedPassword);
+        userRepository.save(user);
+    }
 }
