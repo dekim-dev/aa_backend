@@ -6,6 +6,8 @@ import dekim.aa_backend.entity.User;
 import dekim.aa_backend.persistence.DiaryRepository;
 import dekim.aa_backend.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,15 +44,17 @@ public class DiaryService {
 
 
 
-    public List<Diary> fetchAllDiaries(Long userId) {
+    public Page<Diary> fetchAllDiaries(Long userId, int page, int pageSize) {
         // 사용자의 정보 확인
         Optional<User> userOptional = userRepository.findById(userId);
         if (!userOptional.isPresent()) {
             throw new RuntimeException("User not found");
         }
+        PageRequest pageRequest = PageRequest.of(page, pageSize);
+
         User user = userOptional.get();
         // 사용자와 관련된 다이어리만 조회
-        List<Diary> diaryList = diaryRepository.findByUser(user);
+        Page<Diary> diaryList = diaryRepository.findByUser(user, pageRequest);
 
         return diaryList;
     }

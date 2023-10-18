@@ -3,6 +3,7 @@ package dekim.aa_backend.controller;
 import dekim.aa_backend.entity.Diary;
 import dekim.aa_backend.service.DiaryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -36,9 +37,11 @@ public class DiaryController {
     }
 
     @GetMapping
-    public ResponseEntity<?> fetchDiaryList(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<?> fetchDiaryList(@AuthenticationPrincipal UserDetails userDetails,
+                                            @RequestParam(defaultValue = "0") int page,
+                                            @RequestParam(defaultValue = "10") int pageSize) {
         try {
-            List<Diary> diaryList = diaryService.fetchAllDiaries(Long.valueOf(userDetails.getUsername()));
+            Page<Diary> diaryList = diaryService.fetchAllDiaries(Long.valueOf(userDetails.getUsername()), page, pageSize);
             return new ResponseEntity<>(diaryList, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("다이어리 조회 실패", HttpStatus.NOT_FOUND);
