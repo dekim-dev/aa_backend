@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface DiaryRepository extends JpaRepository<Diary, Long> {
-    Page<Diary> findByUser(User user, Pageable pageable);
+    Page<Diary> findByUserOrderByCreatedAtDesc(User user, Pageable pageable);
     List<Diary> findTop3ByUserOrderByCreatedAtDesc(User user);
 
 }

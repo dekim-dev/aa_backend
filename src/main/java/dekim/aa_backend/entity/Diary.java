@@ -3,9 +3,7 @@ package dekim.aa_backend.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -32,13 +30,8 @@ public class Diary {
   @Column(nullable = false)
   private String conclusion;
 
-  @CreatedDate
   @Column
-  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
   private LocalDateTime createdAt;
-
-  @ElementCollection
-  private List<String> med;
 
   @OneToMany(mappedBy = "diary", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   private List<MedicationList> medicationLists = new ArrayList<>();

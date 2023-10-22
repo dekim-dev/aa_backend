@@ -1,10 +1,12 @@
 package dekim.aa_backend.service;
 
+import dekim.aa_backend.dto.DiaryDTO;
 import dekim.aa_backend.entity.Diary;
 import dekim.aa_backend.entity.MedicationList;
 import dekim.aa_backend.entity.User;
 import dekim.aa_backend.persistence.DiaryRepository;
 import dekim.aa_backend.persistence.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class DiaryService {
 
     @Autowired
@@ -44,20 +47,29 @@ public class DiaryService {
 
 
 
-    public Page<Diary> fetchAllDiaries(Long userId, int page, int pageSize) {
-        // 사용자의 정보 확인
+    public Page<DiaryDTO> fetchAllDiaries(Long userId, int page, int pageSize) {
         Optional<User> userOptional = userRepository.findById(userId);
         if (!userOptional.isPresent()) {
             throw new RuntimeException("User not found");
         }
-        PageRequest pageRequest = PageRequest.of(page, pageSize);
 
         User user = userOptional.get();
-        // 사용자와 관련된 다이어리만 조회
-        Page<Diary> diaryList = diaryRepository.findByUser(user, pageRequest);
+        PageRequest pageRequest = PageRequest.of(page, pageSize);
+        Page<Diary> diaryPage = diaryRepository.findByUserOrderByCreatedAtDesc(user, pageRequest);
 
-        return diaryList;
+        return diaryPage.map(diary -> {
+            DiaryDTO dto = new DiaryDTO();
+            dto.setId(diary.getId());
+            dto.setTitle(diary.getTitle());
+            dto.setContent(diary.getContent());
+            dto.setConclusion(diary.getConclusion());
+            dto.setCreatedAt(diary.getCreatedAt());
+            dto.setMedicationLists(diary.getMedicationLists());
+            return dto;
+        });
     }
+
+
     public List<Diary> fetchLatestThreeDiaries(Long userId) {
         // 사용자의 정보 확인
         Optional<User> userOptional = userRepository.findById(userId);

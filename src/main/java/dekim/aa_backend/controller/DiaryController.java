@@ -1,7 +1,9 @@
 package dekim.aa_backend.controller;
 
+import dekim.aa_backend.dto.DiaryDTO;
 import dekim.aa_backend.entity.Diary;
 import dekim.aa_backend.service.DiaryService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -14,6 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/diary")
+@Slf4j
 public class DiaryController {
 
     @Autowired
@@ -32,7 +35,7 @@ public class DiaryController {
             Diary newDiary = diaryService.createDiary(diary, Long.valueOf(userDetails.getUsername()));
             return new ResponseEntity<>(newDiary, HttpStatus.CREATED);
         } catch (Exception e) {
-            return new ResponseEntity<>("다이어리 생성 실패", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -41,8 +44,8 @@ public class DiaryController {
                                             @RequestParam(defaultValue = "0") int page,
                                             @RequestParam(defaultValue = "10") int pageSize) {
         try {
-            Page<Diary> diaryList = diaryService.fetchAllDiaries(Long.valueOf(userDetails.getUsername()), page, pageSize);
-            return new ResponseEntity<>(diaryList, HttpStatus.OK);
+            Page<DiaryDTO> diaryPage = diaryService.fetchAllDiaries(Long.valueOf(userDetails.getUsername()), page, pageSize);
+            return new ResponseEntity<>(diaryPage, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("다이어리 조회 실패", HttpStatus.NOT_FOUND);
         }
