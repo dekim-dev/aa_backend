@@ -137,7 +137,15 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
       }
       Comment newComment = postService.createComment(Long.valueOf(userDetails.getUsername()), postId, commentDTO);
-      CommentDTO response = CommentDTO.builder().id(newComment.getId()).userId(newComment.getUser().getId()).content(newComment.getContent()).createdAt(newComment.getCreatedAt()).postId(newComment.getPost().getId()).nickname(newComment.getUser().getNickname()).build();
+      CommentDTO response = CommentDTO.builder()
+                      .id(newComment.getId())
+              .userId(newComment.getUser().getId())
+              .content(newComment.getContent())
+              .createdAt(newComment.getCreatedAt())
+              .postId(newComment.getPost().getId())
+              .nickname(newComment.getUser().getNickname())
+              .pfImg(newComment.getUser().getPfImg())
+              .build();
       return new ResponseEntity<>(response,HttpStatus.OK);
     } catch (Exception e) {
       return new ResponseEntity<>("failed to update the comment", HttpStatus.BAD_REQUEST);

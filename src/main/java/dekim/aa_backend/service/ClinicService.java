@@ -181,6 +181,7 @@ public class ClinicService {
               .map(comment -> CommentDTO.builder()
                       .id(comment.getId())
                       .nickname(comment.getUser().getNickname())
+                      .pfImg(comment.getUser().getPfImg())
                       .content(comment.getContent())
                       .createdAt(comment.getCreatedAt())
                       .updatedAt(comment.getUpdatedAt())

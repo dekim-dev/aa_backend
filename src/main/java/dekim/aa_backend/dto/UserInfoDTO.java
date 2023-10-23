@@ -14,9 +14,10 @@ public class UserInfoDTO {
     private String pfImg;
     private Authority authority;
     private IsPaidMember isPaidMember;
+    private String nickname;
 
     public static UserInfoDTO of(User user) {
-        return new UserInfoDTO(user.getId(), user.getPfImg(), user.getAuthority(), user.getIsPaidMember());
+        return new UserInfoDTO(user.getId(), user.getPfImg(), user.getAuthority(), user.getIsPaidMember(), user.getNickname());
     }
 }
 
