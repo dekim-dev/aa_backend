@@ -3,6 +3,7 @@ package dekim.aa_backend.service;
 import dekim.aa_backend.dto.DiaryDTO;
 import dekim.aa_backend.entity.Diary;
 import dekim.aa_backend.entity.MedicationList;
+import dekim.aa_backend.entity.Post;
 import dekim.aa_backend.entity.User;
 import dekim.aa_backend.persistence.DiaryRepository;
 import dekim.aa_backend.persistence.MedicationListRepository;
@@ -104,6 +105,7 @@ public class DiaryService {
             diaryDTO.setContent(diary.getContent());
             diaryDTO.setConclusion(diary.getConclusion());
             diaryDTO.setMedicationLists(diary.getMedicationLists());
+            diaryDTO.setUpdatedAt(diary.getUpdatedAt());
             return diaryDTO;
         } else {
             throw new EntityNotFoundException("Diary not found");
@@ -138,6 +140,7 @@ public class DiaryService {
             updatedDiary.setTitle(diaryDTO.getTitle());
             updatedDiary.setContent(diaryDTO.getContent());
             updatedDiary.setConclusion(diaryDTO.getConclusion());
+            updatedDiary.setCreatedAt(diaryDTO.getCreatedAt());
             updatedDiary.setUpdatedAt(LocalDateTime.now());
 
             // MedicationList 업데이트
@@ -182,5 +185,17 @@ public class DiaryService {
         }
     }
 
+    public void deleteMultipleDiaries( Long userId, List<Long> diaryIds) {
+        for (Long diaryId : diaryIds) {
+            Optional<Diary> diaryOptional = diaryRepository.findById(diaryId);
+            if (diaryOptional.isPresent()) {
+                Diary diary = diaryOptional.get();
+                if (!diary.getUser().getId().equals(userId)) {
+                    throw new RuntimeException("You are not authorized to delete diary with id: " + diaryId);
+                }
+                diaryRepository.deleteById(diaryId);
+            }
+        }
+    }
 
 }

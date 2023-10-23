@@ -103,5 +103,15 @@ public class DiaryController {
         }
     }
 
+    @DeleteMapping("/diary")
+    public ResponseEntity<String> deleteMultipleDiaries(@AuthenticationPrincipal UserDetails userDetails, @RequestBody List<Long> diaryIds) {
+        try {
+            diaryService.deleteMultipleDiaries(Long.valueOf(userDetails.getUsername()), diaryIds);
+            return ResponseEntity.ok("Diaries deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete diaries: " + e.getMessage());
+        }
+    }
+
 
 }
