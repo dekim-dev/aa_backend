@@ -32,7 +32,7 @@ public class WebSecurityConfig {
                     .requestMatchers(HttpMethod.OPTIONS).permitAll() // OPTIONS 요청 허용
                     .requestMatchers("/auth/**").permitAll()
                     .requestMatchers("/admin/**").hasRole("ADMIN")
-                    .anyRequest().permitAll()
+                    .anyRequest().authenticated()
             )
 
             .exceptionHandling(customizer -> customizer
@@ -41,7 +41,10 @@ public class WebSecurityConfig {
             )
             .formLogin(formLogin -> formLogin.disable())
             .apply(new JwtSecurityConfig(tokenProvider));
-    return http.build();
+
+      http.cors();
+
+      return http.build();
   }
 
     @Bean
