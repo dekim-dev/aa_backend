@@ -61,4 +61,47 @@ public class DiaryController {
         }
     }
 
+    @GetMapping("/{diaryId}")
+    public ResponseEntity<?> fetchDiaryById(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long diaryId) {
+        try {
+            DiaryDTO diaryDTO = diaryService.fetchDiaryById(Long.valueOf(userDetails.getUsername()), diaryId);
+            return new ResponseEntity<>(diaryDTO, HttpStatus.OK);
+        } catch (Exception e) {
+            log.warn("Error retrieving diary with ID: " + diaryId, e);
+            return new ResponseEntity<>(e, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @DeleteMapping("/{diaryId}")
+    public ResponseEntity<?> deleteByDiaryId(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long diaryId) {
+        try {
+            diaryService.deleteDiaryById(Long.valueOf(userDetails.getUsername()), diaryId);
+            return new ResponseEntity<>("다이어리 삭제 완료", HttpStatus.ACCEPTED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e, HttpStatus.NOT_FOUND);
+        }
+    }
+    @PutMapping("/{diaryId}")
+    public ResponseEntity<?> updateDiary(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long diaryId,
+            @RequestBody DiaryDTO updatedDiary) {
+        try {
+            diaryService.updateDiary(Long.valueOf(userDetails.getUsername()), diaryId, updatedDiary);
+            return new ResponseEntity<>(updatedDiary, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+        }
+    }
+    @DeleteMapping("/{diaryId}/{medId}")
+    public ResponseEntity<?> deleteByDiaryId(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long diaryId, @PathVariable Long medId) {
+        try {
+            diaryService.deleteMedicationListById(Long.valueOf(userDetails.getUsername()), medId);
+            return new ResponseEntity<>("복용약 리스트 삭제 완료", HttpStatus.ACCEPTED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e, HttpStatus.NOT_FOUND);
+        }
+    }
+
+
 }

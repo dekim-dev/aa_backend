@@ -3,6 +3,7 @@ package dekim.aa_backend.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -32,6 +33,10 @@ public class Diary {
 
   @Column
   private LocalDateTime createdAt;
+
+  @Column
+  @UpdateTimestamp
+  private LocalDateTime updatedAt;
 
   @OneToMany(mappedBy = "diary", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   private List<MedicationList> medicationLists = new ArrayList<>();
