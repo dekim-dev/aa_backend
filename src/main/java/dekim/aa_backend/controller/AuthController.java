@@ -28,8 +28,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenDTO> login(@RequestBody UserRequestDTO userRequestDTO) {
-        return ResponseEntity.ok(authService.login(userRequestDTO));
+    public ResponseEntity<?> login(@RequestBody UserRequestDTO userRequestDTO) {
+        try {
+            TokenDTO loginUser = authService.login(userRequestDTO);
+            return new ResponseEntity<>(loginUser, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PostMapping("/reissue")

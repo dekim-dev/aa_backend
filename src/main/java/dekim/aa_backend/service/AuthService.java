@@ -1,6 +1,7 @@
 package dekim.aa_backend.service;
 
 import dekim.aa_backend.config.jwt.TokenProvider;
+import dekim.aa_backend.constant.Authority;
 import dekim.aa_backend.constant.IsActive;
 import dekim.aa_backend.dto.TokenDTO;
 import dekim.aa_backend.dto.TokenRequestDTO;
@@ -16,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -54,31 +56,46 @@ public class AuthService {
         // 1. Login ID/PW 를 기반으로 AuthenticationToken 생성
         UsernamePasswordAuthenticationToken authenticationToken = userRequestDTO.toAuthentication();
 
-        // 2. 실제로 검증 (사용자 비밀번호 체크)을 하는 부분
-        //    authenticate 메서드가 실행이 될 때 CustomUserDetailsService 에서 만들었던 loadUserByUsername 메서드가 실행됨
-        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-        log.info("🍒authentication: " + authentication);
+        // 2. 계정 존재 여부 확인
+        User loginUser = userRepository.findByEmail(userRequestDTO.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 계정입니다."));
 
-        // 3. 인증 정보를 기반으로 JWT 토큰 생성
-        TokenDTO tokenDTO = tokenProvider.generateTokenDto(authentication);
+        // 3. 비밀번호 일치 여부 확인
+        if (!passwordEncoder.matches(userRequestDTO.getPassword(), loginUser.getPassword())) {
+            throw new IllegalArgumentException("비밀번호가 맞지 않습니다.");
+        }
 
-        // 4. RefreshToken 저장
-        RefreshToken refreshTokenEntity = RefreshToken.builder()
-                .key(authentication.getName())
-                .value(tokenDTO.getRefreshToken())
-                .expiresIn(tokenDTO.getRefreshTokenExpiresIn())
-                .build();
+        // 4. 사용자의 권한 및 활성화 상태 확인
+        if (loginUser.getAuthority() != Authority.ROLE_ADMIN && loginUser.getAuthority() != Authority.ROLE_USER) {
+            throw new IllegalArgumentException("권한이 올바르지 않습니다.");
+        }
 
-        refreshTokenRepository.save(refreshTokenEntity);
+        // 5. ROLE_USER인 경우에만 isActive 확인
+        if (loginUser.getAuthority() == Authority.ROLE_USER) {
+            if (loginUser.getIsActive() != IsActive.ACTIVE) {
+                throw new IllegalArgumentException("이메일 인증이 완료되지 않았습니다.");
+            }
+        }
 
-        log.info("🍒authentication" + authentication);
-        log.info("🔑ACCESS_TOKEN:" + tokenDTO.getAccessToken());
-        log.info("🔑REFRESH_TOKEN:" + tokenDTO.getRefreshToken());
+        // 6. 인증 및 토큰 생성
+        try {
+            Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+            TokenDTO tokenDTO = tokenProvider.generateTokenDto(authentication);
 
-        // 5. 토큰 발금
-        return tokenDTO;
+            // 7. RefreshToken 저장
+            RefreshToken refreshTokenEntity = RefreshToken.builder()
+                    .key(authentication.getName())
+                    .value(tokenDTO.getRefreshToken())
+                    .expiresIn(tokenDTO.getRefreshTokenExpiresIn())
+                    .build();
+            refreshTokenRepository.save(refreshTokenEntity);
 
+            return tokenDTO;
+        } catch (AuthenticationException e) {
+            throw e;
+        }
     }
+
 
     @Transactional
     public TokenDTO reissue(TokenRequestDTO tokenRequestDTO) {
