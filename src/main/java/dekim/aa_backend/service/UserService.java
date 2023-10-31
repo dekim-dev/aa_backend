@@ -212,12 +212,12 @@ public class UserService {
             .orElseThrow(() -> new IllegalArgumentException("User not found :" + blockedUserId));
 
     if(user.equals(blockedUser)) {
-      throw new IllegalArgumentException("You cannot block yourself.");
+      throw new IllegalArgumentException("본인을 차단할 수 없습니다.");
     }
 
     boolean isBlockedAlready = userBlockRepository.findByBlockerAndBlockedUser(user, blockedUser).isPresent();
     if(isBlockedAlready) {
-      throw new IllegalArgumentException("You've already blocked this user.");
+      throw new IllegalArgumentException("이미 차단한 회원입니다.");
     }
 
     UserBlock userBlock = new UserBlock();
@@ -235,7 +235,7 @@ public class UserService {
             .orElseThrow(() -> new IllegalArgumentException("User not found :" + blockedUserId));
 
     UserBlock userBlock = userBlockRepository.findByBlockerAndBlockedUser(user, blockedUser)
-            .orElseThrow(() -> new IllegalArgumentException("You've not blocked this user."));
+            .orElseThrow(() -> new IllegalArgumentException("차단한 회원이 아닙니다."));
     userBlockRepository.delete(userBlock);
   }
 
@@ -248,7 +248,7 @@ public class UserService {
             .orElseThrow(() -> new IllegalArgumentException("User not found :" + reportRequestDTO.getReportedUserId()));
 
     if(user.equals(reportedUser)) {
-      throw new IllegalArgumentException("You cannot block yourself.");
+      throw new IllegalArgumentException("회원본인을 신고할 수 없습니다.");
     }
 
     UserReport userBlock = new UserReport();

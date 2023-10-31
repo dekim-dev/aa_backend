@@ -39,6 +39,7 @@ public class MainController {
         }
     }
 
+
     // 광고
     @GetMapping("/ads")
     public ResponseEntity<?> getAllAdvertisements(@AuthenticationPrincipal UserDetails userDetails) {
