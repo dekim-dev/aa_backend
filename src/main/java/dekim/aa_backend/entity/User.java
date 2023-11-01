@@ -1,5 +1,6 @@
 package dekim.aa_backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import dekim.aa_backend.constant.Authority;
 import dekim.aa_backend.constant.IsActive;
 import dekim.aa_backend.constant.IsPaidMember;
@@ -93,6 +94,7 @@ public class User {
   private Set<ClinicRecommendation> recommendations = new HashSet<>();
 
   @OneToMany(mappedBy = "blocker", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  @JsonManagedReference
   private List<UserBlock> blockedUsers = new ArrayList<>();
 
   @OneToMany(mappedBy = "blockedUser", fetch = FetchType.LAZY, cascade = CascadeType.ALL)

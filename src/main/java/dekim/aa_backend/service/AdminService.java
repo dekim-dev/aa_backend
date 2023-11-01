@@ -17,8 +17,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.hibernate.Hibernate.map;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -53,6 +51,7 @@ public class AdminService {
             .email(user.getEmail())
             .regDate(user.getRegDate())
             .isPaidMember(user.getIsPaidMember())
+            .blockedUsers(user.getBlockedUsers())
             .build();
   }
 

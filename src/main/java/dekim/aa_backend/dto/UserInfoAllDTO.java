@@ -4,6 +4,7 @@ import dekim.aa_backend.constant.IsPaidMember;
 import dekim.aa_backend.entity.Comment;
 import dekim.aa_backend.entity.Likes;
 import dekim.aa_backend.entity.Post;
+import dekim.aa_backend.entity.UserBlock;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -26,4 +27,5 @@ public class UserInfoAllDTO {
   private List<Post> posts;
   private List<Comment> comments;
   private Set<Likes> likes;
+  private List<UserBlock> blockedUsers;
   }

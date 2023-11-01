@@ -1,5 +1,6 @@
 package dekim.aa_backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -19,6 +20,7 @@ public class UserBlock {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn
+    @JsonBackReference
     private User blocker;
 
     @ManyToOne(fetch = FetchType.LAZY)
