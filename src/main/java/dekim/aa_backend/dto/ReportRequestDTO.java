@@ -1,6 +1,5 @@
 package dekim.aa_backend.dto;
 
-import dekim.aa_backend.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

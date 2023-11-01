@@ -251,12 +251,17 @@ public class UserService {
       throw new IllegalArgumentException("회원본인을 신고할 수 없습니다.");
     }
 
-    UserReport userBlock = new UserReport();
-    userBlock.setReporter(user);
-    userBlock.setReportedUser(reportedUser);
-    userBlock.setContent(reportRequestDTO.getContent());
-    userBlock.setReportDate(reportRequestDTO.getReportDate());
-    userReportRepository.save(userBlock);
+    boolean isReportedAlready = userReportRepository.findByReporterAndReportedUser(user, reportedUser).isPresent();
+    if(isReportedAlready) {
+      throw new IllegalArgumentException("이미 신고한 회원입니다.");
+    }
+
+    UserReport userReport = new UserReport();
+    userReport.setReporter(user);
+    userReport.setReportedUser(reportedUser);
+    userReport.setContent(reportRequestDTO.getContent());
+    userReport.setReportDate(reportRequestDTO.getReportDate());
+    userReportRepository.save(userReport);
   }
 
   // 회원 신고
