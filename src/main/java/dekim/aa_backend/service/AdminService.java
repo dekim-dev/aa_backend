@@ -287,5 +287,17 @@ public class AdminService {
     }
   }
 
+  // 신고 처리
+  @PreAuthorize("hasRole('ADMIN')")
+  public ReportResponseDTO updateReportStatus(Long reportId) {
+    UserReport userReport = userReportRepository.findById(reportId)
+            .orElseThrow(() -> new EntityNotFoundException("Report Id" + reportId + "was not found"));
+    userReport.setManaged(userReport.isManaged() ? false : true);
+    userReportRepository.save(userReport);
+    ReportResponseDTO reportResponseDTO = mapUserReportToDTO(userReport);
+    return reportResponseDTO;
+  }
+
+
 
 }

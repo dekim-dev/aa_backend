@@ -186,5 +186,17 @@ public class AdminController {
     }
   }
 
+  // 신고 처리
+  @PatchMapping("/report/{reportId}")
+  public ResponseEntity<?> updateReportStatus(@PathVariable Long reportId) {
+    try {
+      ReportResponseDTO reportResponseDTO = adminService.updateReportStatus(reportId);
+      return ResponseEntity.ok(reportResponseDTO);
+    } catch (EntityNotFoundException e) {
+      return new ResponseEntity<>("신고내역 존재하지 않음: " + e.getMessage(), HttpStatus.NOT_FOUND);
+    } catch (Exception e) {
+      return new ResponseEntity<>("신고상태 수정 실패: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+  }
 
 }
