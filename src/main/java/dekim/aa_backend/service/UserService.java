@@ -261,6 +261,7 @@ public class UserService {
     userReport.setReportedUser(reportedUser);
     userReport.setContent(reportRequestDTO.getContent());
     userReport.setReportDate(reportRequestDTO.getReportDate());
+    userReport.setManaged(false);
     userReportRepository.save(userReport);
   }
 

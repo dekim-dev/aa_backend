@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.hibernate.Hibernate.map;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -28,6 +30,7 @@ public class AdminService {
   private final PostRepository postRepository;
   private final CommentRepository commentRepository;
   private final PostService postService;
+  private final UserReportRepository userReportRepository;
 
   // 모든 사용자 정보 조회
   @PreAuthorize("hasRole('ADMIN')")
@@ -243,11 +246,46 @@ public class AdminService {
     return dto;
   }
 
-// 댓글 삭제
+  // 댓글 삭제
   @PreAuthorize("hasRole('ADMIN')")
   public void deleteComments(List<Long> ids) {
     for (Long id : ids) {
       commentRepository.deleteById(id);
     }
   }
+
+  // 신고 조회
+  @PreAuthorize("hasRole('ADMIN')")
+  public Page<ReportResponseDTO> getAllReports(Pageable pageable) {
+    Page<UserReport> userReportPage = userReportRepository.findAll(pageable);
+    Page<ReportResponseDTO> reportDTOPage = userReportPage
+            .map(this::mapUserReportToDTO);  // 엔티티를 DTO로 매핑
+
+    return reportDTOPage;
+  }
+
+  // UserReport 엔티티를 ReportResponseDTO로 수동으로 매핑하는 메서드
+  public ReportResponseDTO mapUserReportToDTO(UserReport userReport) {
+    ReportResponseDTO reportResponseDTO = new ReportResponseDTO();
+    reportResponseDTO.setId(userReport.getId());
+    reportResponseDTO.setUserId(userReport.getReporter().getId());
+    reportResponseDTO.setUserNickname(userReport.getReporter().getNickname());
+    reportResponseDTO.setUserEmail(userReport.getReporter().getEmail());
+    reportResponseDTO.setReportedUserId(userReport.getReportedUser().getId());
+    reportResponseDTO.setReportedUserNickname(userReport.getReportedUser().getNickname());
+    reportResponseDTO.setContent(userReport.getContent());
+    reportResponseDTO.setReportDate(userReport.getReportDate());
+    reportResponseDTO.setManaged(userReport.isManaged());
+    return reportResponseDTO;
+  }
+
+  // 신고 삭제
+  @PreAuthorize("hasRole('ADMIN')")
+  public void deleteReports(List<Long> ids) {
+    for (Long id : ids) {
+      userReportRepository.deleteById(id);
+    }
+  }
+
+
 }

@@ -26,6 +26,9 @@ public class UserReport {
     @Column
     private LocalDateTime reportDate;
 
+    @Column
+    private boolean isManaged;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn
     private User reporter;

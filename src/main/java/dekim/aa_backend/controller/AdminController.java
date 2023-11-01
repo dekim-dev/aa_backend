@@ -1,10 +1,7 @@
 package dekim.aa_backend.controller;
 
 import dekim.aa_backend.dto.*;
-import dekim.aa_backend.entity.Advertisement;
-import dekim.aa_backend.entity.Clinic;
-import dekim.aa_backend.entity.Comment;
-import dekim.aa_backend.entity.Post;
+import dekim.aa_backend.entity.*;
 import dekim.aa_backend.service.AdminService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -163,5 +160,31 @@ public class AdminController {
       return new ResponseEntity<>("댓글 삭제 실패: " + e.getMessage(), HttpStatus.BAD_REQUEST);
     }
   }
+
+  // 신고 조회
+  @GetMapping("/report")
+  public ResponseEntity<?> getAllReports(@RequestParam(defaultValue = "0") int page,
+                                          @RequestParam(defaultValue = "10") int pageSize) {
+    try {
+      Page<ReportResponseDTO> reportPage = adminService.getAllReports(PageRequest.of(page, pageSize));
+      return ResponseEntity.ok(reportPage);
+    } catch (Exception e) {
+      return new ResponseEntity<>("신고 조회 실패: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  // 신고 삭제
+  @DeleteMapping("/report")
+  public ResponseEntity<?> deleteReports(@RequestBody List<Long> ids) {
+    try {
+      adminService.deleteReports(ids);
+      return ResponseEntity.ok("신고글 삭제 성공");
+    } catch (EntityNotFoundException e) {
+      return new ResponseEntity<>("존재하지 않는 신고글: " + e.getMessage(), HttpStatus.NOT_FOUND);
+    } catch (Exception e) {
+      return new ResponseEntity<>("신고글 삭제 실패: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+  }
+
 
 }
