@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Setter
 @Getter
 @AllArgsConstructor
@@ -16,4 +18,6 @@ public class InquiryRequestDTO {
     private boolean isAnswered;
     private Long userId;
     private String userNickname;
+    private String userEmail;
+    private LocalDateTime inquiryDate;
 }

@@ -319,9 +319,11 @@ public class AdminService {
     inquiryRequestDTO.setId(inquiry.getId());
     inquiryRequestDTO.setUserId(inquiry.getUser().getId());
     inquiryRequestDTO.setUserNickname(inquiry.getUser().getNickname());
+    inquiryRequestDTO.setUserEmail(inquiry.getUser().getEmail());
     inquiryRequestDTO.setTitle(inquiry.getTitle());
     inquiryRequestDTO.setContent(inquiry.getContent());
     inquiryRequestDTO.setAnswered(inquiry.isAnswered());
+    inquiryRequestDTO.setInquiryDate(inquiry.getInquiryDate());
     return inquiryRequestDTO;
   }
 
