@@ -199,4 +199,28 @@ public class AdminController {
     }
   }
 
+  // 문의 조회
+  @GetMapping("/inquiry")
+  public ResponseEntity<?> getAllInquiries(@RequestParam(defaultValue = "0") int page,
+                                         @RequestParam(defaultValue = "10") int pageSize) {
+    try {
+      Page<InquiryRequestDTO> inquiryRequestDTOPage = adminService.getAllInquiries(PageRequest.of(page, pageSize));
+      return new ResponseEntity<>(inquiryRequestDTOPage, HttpStatus.OK);
+    } catch (Exception e) {
+      return new ResponseEntity<>("신고 조회 실패: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  // 문의 처리
+  @PatchMapping("/inquiry/{inquiryId}")
+  public ResponseEntity<?> updateInquiryStatus(@PathVariable Long inquiryId) {
+    try {
+      InquiryRequestDTO inquiryRequestDTO = adminService.updateInquiryStatus(inquiryId);
+      return new ResponseEntity<>(inquiryRequestDTO, HttpStatus.OK);
+    } catch (EntityNotFoundException e) {
+      return new ResponseEntity<>("문의내역 존재하지 않음: " + e.getMessage(), HttpStatus.NOT_FOUND);
+    } catch (Exception e) {
+      return new ResponseEntity<>("문의상태 수정 실패: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+  }
 }

@@ -1,9 +1,6 @@
 package dekim.aa_backend.controller;
 
-import dekim.aa_backend.dto.CommentDTO;
-import dekim.aa_backend.dto.PostResponseDTO;
-import dekim.aa_backend.dto.ReportRequestDTO;
-import dekim.aa_backend.dto.UserInfoAllDTO;
+import dekim.aa_backend.dto.*;
 import dekim.aa_backend.exception.DuplicatePostReportException;
 import dekim.aa_backend.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -167,4 +164,16 @@ public class UserController {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
+
+    // 문의
+    @PostMapping("/inquiry")
+    public ResponseEntity<?> createInquiry(@AuthenticationPrincipal UserDetails userDetails, @RequestBody InquiryRequestDTO inquiryRequestDTO) {
+        try {
+            userService.createInquiry(Long.valueOf(userDetails.getUsername()), inquiryRequestDTO);
+            return new ResponseEntity<>(inquiryRequestDTO, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+        }
+    }
+
 }

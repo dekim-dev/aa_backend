@@ -28,4 +28,5 @@ public class UserInfoAllDTO {
   private List<Comment> comments;
   private Set<Likes> likes;
   private List<UserBlock> blockedUsers;
-  }
+  private List<String> blockedUserNicknames;
+}

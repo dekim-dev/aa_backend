@@ -29,6 +29,7 @@ public class AdminService {
   private final CommentRepository commentRepository;
   private final PostService postService;
   private final UserReportRepository userReportRepository;
+  private final InquiryRepository inquiryRepository;
 
   // 모든 사용자 정보 조회
   @PreAuthorize("hasRole('ADMIN')")
@@ -44,6 +45,11 @@ public class AdminService {
   }
 
   private UserInfoAllDTO convertToUserInfoAllDTO(User user) {
+    List<String> blockedUserNicknames = user.getBlockedUsers().stream()
+            .map(UserBlock::getBlockedUser)
+            .map(User::getNickname)
+            .collect(Collectors.toList());
+
     return UserInfoAllDTO.builder()
             .id(user.getId())
             .pfImg(user.getPfImg())
@@ -52,8 +58,10 @@ public class AdminService {
             .regDate(user.getRegDate())
             .isPaidMember(user.getIsPaidMember())
             .blockedUsers(user.getBlockedUsers())
+            .blockedUserNicknames(blockedUserNicknames)  // blockedUserNicknames 필드 설정
             .build();
   }
+
 
   // 회원 삭제
   @PreAuthorize("hasRole('ADMIN')")
@@ -297,6 +305,34 @@ public class AdminService {
     return reportResponseDTO;
   }
 
+  // 문의 조회
+  @PreAuthorize("hasRole('ADMIN')")
+  public Page<InquiryRequestDTO> getAllInquiries(Pageable pageable) {
+    Page<Inquiry> inquiryPage = inquiryRepository.findAll(pageable);
+    Page<InquiryRequestDTO> reportDTOPage = inquiryPage
+            .map(this::mapInquiryToDTO);  // 엔티티를 DTO로 매핑
+    return reportDTOPage;
+  }
 
+  public InquiryRequestDTO mapInquiryToDTO(Inquiry inquiry) {
+    InquiryRequestDTO inquiryRequestDTO = new InquiryRequestDTO();
+    inquiryRequestDTO.setId(inquiry.getId());
+    inquiryRequestDTO.setUserId(inquiry.getUser().getId());
+    inquiryRequestDTO.setUserNickname(inquiry.getUser().getNickname());
+    inquiryRequestDTO.setTitle(inquiry.getTitle());
+    inquiryRequestDTO.setContent(inquiry.getContent());
+    inquiryRequestDTO.setAnswered(inquiry.isAnswered());
+    return inquiryRequestDTO;
+  }
 
+  // 문의 처리
+  @PreAuthorize("hasRole('ADMIN')")
+  public InquiryRequestDTO updateInquiryStatus(Long inquiryId) {
+    Inquiry inquiry = inquiryRepository.findById(inquiryId)
+            .orElseThrow(() -> new EntityNotFoundException("Inquiry Id" + inquiryId + "was not found"));
+    inquiry.setAnswered(inquiry.isAnswered() ? false : true);
+    inquiryRepository.save(inquiry);
+    InquiryRequestDTO inquiryRequestDTO = mapInquiryToDTO(inquiry);
+    return inquiryRequestDTO;
+  }
 }

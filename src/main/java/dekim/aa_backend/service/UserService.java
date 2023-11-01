@@ -1,9 +1,6 @@
 package dekim.aa_backend.service;
 
-import dekim.aa_backend.dto.CommentDTO;
-import dekim.aa_backend.dto.PostResponseDTO;
-import dekim.aa_backend.dto.ReportRequestDTO;
-import dekim.aa_backend.dto.UserInfoAllDTO;
+import dekim.aa_backend.dto.*;
 import dekim.aa_backend.entity.*;
 import dekim.aa_backend.exception.DuplicatePostReportException;
 import dekim.aa_backend.persistence.*;
@@ -37,6 +34,8 @@ public class UserService {
   PostReportRepository postReportRepository;
   @Autowired
   PasswordEncoder passwordEncoder;
+  @Autowired
+  InquiryRepository inquiryRepository;
 
   // 내 글 보기
   public Page<PostResponseDTO> getUserPost(Long userId, int page, int pageSize) {
@@ -67,7 +66,7 @@ public class UserService {
   }
 
   // 내 글 삭제
-  public void deleteMultiplePosts( Long userId, List<Long> postIds) {
+  public void deleteMultiplePosts(Long userId, List<Long> postIds) {
     for (Long postId : postIds) {
       Optional<Post> postOptional = postRepository.findById(postId);
       if (postOptional.isPresent()) {
@@ -211,12 +210,12 @@ public class UserService {
     User blockedUser = userRepository.findById(blockedUserId)
             .orElseThrow(() -> new IllegalArgumentException("User not found :" + blockedUserId));
 
-    if(user.equals(blockedUser)) {
+    if (user.equals(blockedUser)) {
       throw new IllegalArgumentException("본인을 차단할 수 없습니다.");
     }
 
     boolean isBlockedAlready = userBlockRepository.findByBlockerAndBlockedUser(user, blockedUser).isPresent();
-    if(isBlockedAlready) {
+    if (isBlockedAlready) {
       throw new IllegalArgumentException("이미 차단한 회원입니다.");
     }
 
@@ -247,12 +246,12 @@ public class UserService {
     User reportedUser = userRepository.findById(reportRequestDTO.getReportedUserId())
             .orElseThrow(() -> new IllegalArgumentException("User not found :" + reportRequestDTO.getReportedUserId()));
 
-    if(user.equals(reportedUser)) {
+    if (user.equals(reportedUser)) {
       throw new IllegalArgumentException("회원본인을 신고할 수 없습니다.");
     }
 
     boolean isReportedAlready = userReportRepository.findByReporterAndReportedUser(user, reportedUser).isPresent();
-    if(isReportedAlready) {
+    if (isReportedAlready) {
       throw new IllegalArgumentException("이미 신고한 회원입니다.");
     }
 
@@ -273,7 +272,7 @@ public class UserService {
     UserReport userReport = userReportRepository.findById(reportId)
             .orElseThrow(() -> new EntityNotFoundException("Report not found"));
 
-    if(user.equals(userReport.getReporter())) {
+    if (user.equals(userReport.getReporter())) {
       userReportRepository.delete(userReport);
     }
   }
@@ -313,4 +312,18 @@ public class UserService {
     }
   }
 
+  // 문의
+  public InquiryRequestDTO createInquiry(Long userId, InquiryRequestDTO inquiryRequestDTO) {
+
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    Inquiry newInquiry = new Inquiry();
+    newInquiry.setUser(user);
+    newInquiry.setTitle(inquiryRequestDTO.getTitle());
+    newInquiry.setContent(inquiryRequestDTO.getContent());
+    newInquiry.setAnswered(false);
+    inquiryRepository.save(newInquiry);
+
+    return inquiryRequestDTO;
+  }
 }

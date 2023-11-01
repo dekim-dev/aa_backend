@@ -106,6 +106,9 @@ public class User {
   @OneToMany(mappedBy = "reportedUser", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   private List<UserReport> reportUsers = new ArrayList<>();
 
+  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  private List<Inquiry> inquiredUsers = new ArrayList<>();
+
 }
 
 // 📌연관 관계의 주인이 아닌 객체에서 mappedBy 속성을 사용해서 주인을 지정해줘야 하고, 연관관계의 주인은 항상 N
