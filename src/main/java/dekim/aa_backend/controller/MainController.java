@@ -1,6 +1,7 @@
 package dekim.aa_backend.controller;
 
 import dekim.aa_backend.dto.AdvertisementDTO;
+import dekim.aa_backend.dto.PostResponseDTO;
 import dekim.aa_backend.dto.UserInfoDTO;
 import dekim.aa_backend.entity.Advertisement;
 import dekim.aa_backend.entity.Diary;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -52,6 +54,17 @@ public class MainController {
             return new ResponseEntity<>(advertisementDTOS, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("광고 조회 실패", HttpStatus.NOT_FOUND);
+        }
+    }
+
+    // 메인용 최근 게시글 5개 불러오기
+    @GetMapping("/post/{boardCategory}")
+    public ResponseEntity<?> getFiveLatestPostsForMain(@PathVariable String boardCategory) {
+        try {
+            List<PostResponseDTO> postResponseDTOList = mainService.fetchTop5PostsFromBoard(boardCategory);
+            return new ResponseEntity<>(postResponseDTOList, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("게시글 불러오기 실패", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

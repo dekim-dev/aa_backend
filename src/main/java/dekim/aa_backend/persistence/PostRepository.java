@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
@@ -17,5 +19,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
   Page<Post> searchByTitleOrContentAndBoard(@Param("keyword") String keyword, @Param("boardCategory") String boardCategory, Pageable pageable);
 
   Page<Post> findByLikesCountGreaterThanEqual(int likesCount, Pageable pageable);
-
+  List<Post> findTop5ByBoardCategoryOrderByCreatedAtDesc(String boardCategory);
 }
