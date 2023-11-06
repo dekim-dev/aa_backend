@@ -3,6 +3,7 @@ package dekim.aa_backend.controller;
 import dekim.aa_backend.dto.*;
 import dekim.aa_backend.entity.*;
 import dekim.aa_backend.service.AdminService;
+import dekim.aa_backend.service.ClinicService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -23,6 +25,8 @@ public class AdminController {
 
   @Autowired
   AdminService adminService;
+  @Autowired
+  ClinicService clinicService;
 
   @GetMapping("/users")
   public ResponseEntity<Page<UserInfoAllDTO>> getAllUsers(@RequestParam(defaultValue = "0") int page,
@@ -59,6 +63,29 @@ public class AdminController {
   public ResponseEntity<String> deleteClinic(@RequestBody List<Long> clinicIds) {
     adminService.deleteClinic(clinicIds);
     return ResponseEntity.ok("Clinic deleted successfully.");
+  }
+
+  // 병원 정보 업데이트 from public api
+  @GetMapping("/clinic/update")
+  public ResponseEntity<String> updateClinics() {
+    try {
+      clinicService.updateClinicsFromPublicData();
+      return ResponseEntity.ok("병원 정보 업데이트 성공");
+    } catch (IOException e) {
+      e.printStackTrace();
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("병원 정보 업데이트 실패");
+    }
+  }
+  // ❗️db 관리 담당자용!
+  @GetMapping("/clinic/db_manager")
+  public ResponseEntity<?> CallAPiWithJson() {
+    try {
+      clinicService.insertClinicDataToDB();
+      return ResponseEntity.ok("병원 정보 저장 완료");
+    } catch (IOException e) {
+      e.printStackTrace();
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("병원 정보 저장 실패");
+    }
   }
 
   // 광고 등록

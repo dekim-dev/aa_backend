@@ -30,28 +30,28 @@ public class ClinicController {
 
   private final ClinicService clinicService;
 
-  @GetMapping("")
-  public ResponseEntity<?> CallAPiWithJson() {
-    try {
-      clinicService.insertClinicDataToDB();
-      return ResponseEntity.ok("병원 정보 저장 완료");
-    } catch (IOException e) {
-      e.printStackTrace();
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("병원 정보 저장 실패");
-      }
-    }
+//  @GetMapping("")
+//  public ResponseEntity<?> CallAPiWithJson() {
+//    try {
+//      clinicService.insertClinicDataToDB();
+//      return ResponseEntity.ok("병원 정보 저장 완료");
+//    } catch (IOException e) {
+//      e.printStackTrace();
+//      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("병원 정보 저장 실패");
+//      }
+//    }
 
 
-  @GetMapping("/update")
-  public ResponseEntity<String> updateClinics() {
-    try {
-      clinicService.updateClinicsFromPublicData();
-      return ResponseEntity.ok("병원 정보 업데이트 성공");
-    } catch (IOException e) {
-      e.printStackTrace();
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("병원 정보 업데이트 실패");
-    }
-  }
+//  @GetMapping("/update")
+//  public ResponseEntity<String> updateClinics() {
+//    try {
+//      clinicService.updateClinicsFromPublicData();
+//      return ResponseEntity.ok("병원 정보 업데이트 성공");
+//    } catch (IOException e) {
+//      e.printStackTrace();
+//      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("병원 정보 업데이트 실패");
+//    }
+//  }
 
 
   /* DB에서 병원 리스트 가져오기 */

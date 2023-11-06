@@ -49,7 +49,7 @@ public class Clinic {
   @Column
   private int viewCount;
 
-  @OneToMany(mappedBy = "clinic")
+  @OneToMany(mappedBy = "clinic", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   private Set<ClinicRecommendation> recommendations = new HashSet<>();
 
   @OneToMany(mappedBy = "clinic", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
