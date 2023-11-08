@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -34,10 +33,6 @@ public class PostService {
   private UserRepository userRepository;
   @Autowired
   private CommentRepository commentRepository;
-
-  public Optional<Post> retrieve(Long postId) {
-    return postRepository.findById(postId);
-  }
 
   public PostResponseDTO bringPost(Long postId) {
     Optional<Post> postOptional = postRepository.findById(postId);
@@ -264,5 +259,23 @@ public class PostService {
 
     return postRepository.findByLikesCountGreaterThanEqual(10,pageRequest)
             .map(this::convertToDTO);
+  }
+
+
+  // 공지사항 게시글 (토큰 필요 X)
+  public  PostResponseDTO retrieve(Long postId, String boardCategory) {
+      Optional<Post> optionalPost = postRepository.findByIdAndBoardCategory(postId, boardCategory);
+      if (optionalPost.isEmpty()) {
+        throw new EntityNotFoundException();
+      }
+
+    return convertToDTO(optionalPost.get());
+  }
+
+  // 공지사항 게시글 리스트 (토큰 필요 X)
+  public Page<PostResponseDTO> retrieveFromNoticeBoard(int page, int pageSize) {
+    PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+    Page<Post> postPage = postRepository.findByBoardCategory("notice", pageRequest);
+    return postPage.map(this::convertToDTO);
   }
 }

@@ -6,16 +6,16 @@ import dekim.aa_backend.dto.UserInfoDTO;
 import dekim.aa_backend.entity.Advertisement;
 import dekim.aa_backend.entity.Diary;
 import dekim.aa_backend.service.MainService;
+import dekim.aa_backend.service.PostService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -26,6 +26,7 @@ import java.util.List;
 public class MainController {
 
     private final MainService mainService;
+    private final PostService postService;
 
     @GetMapping("/userInfo")
     public ResponseEntity<?> getUserInfo(@AuthenticationPrincipal UserDetails userDetails) {
@@ -65,6 +66,35 @@ public class MainController {
             return new ResponseEntity<>(postResponseDTOList, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("게시글 불러오기 실패", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // 공지사항 게시글 가져오기
+    @GetMapping("/{boardCategory}/{postId}")
+    public ResponseEntity<?> getNotice(@PathVariable Long postId, @PathVariable String boardCategory) {
+        try {
+            PostResponseDTO post = postService.retrieve(postId, boardCategory);
+            return new ResponseEntity<>(post, HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(e, HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // 공지사항 리스트 가져오기
+    @GetMapping("/board/notice")
+    public ResponseEntity<Page<PostResponseDTO>> getPostsByBoardCategory(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int pageSize
+    ) {
+        try {
+            Page<PostResponseDTO> postResponsePage = postService.retrieveFromNoticeBoard(page, pageSize);
+            log.info("🎈성공: " + postResponsePage);
+            return ResponseEntity.ok(postResponsePage);
+        } catch (Exception e) {
+            log.warn("🧨에러: " + e);
+            return ResponseEntity.badRequest().build();
         }
     }
 }
