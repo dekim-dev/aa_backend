@@ -3,6 +3,7 @@ package dekim.aa_backend.controller;
 import dekim.aa_backend.dto.*;
 import dekim.aa_backend.exception.DuplicatePostReportException;
 import dekim.aa_backend.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -173,7 +174,8 @@ public class UserController {
             return new ResponseEntity<>(inquiryRequestDTO, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(e, HttpStatus.NOT_FOUND);
         }
     }
-
 }
