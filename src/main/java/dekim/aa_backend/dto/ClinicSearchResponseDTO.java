@@ -9,6 +9,6 @@ import java.util.List;
 @Getter
 @Setter
 public class ClinicSearchResponseDTO {
-  private List<Clinic> clinics;
+  private List<ClinicDTO> clinics;
   private long totalResults;
 }

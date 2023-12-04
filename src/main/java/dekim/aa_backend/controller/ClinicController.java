@@ -71,7 +71,7 @@ public class ClinicController {
           @RequestParam(defaultValue = "0") int page,
           @RequestParam(defaultValue = "10") int pageSize
   ) {
-    Page<Clinic> clinics = clinicService.searchClinicsByKeyword(keyword, PageRequest.of(page, pageSize));
+    Page<ClinicDTO> clinics = clinicService.searchClinicsByKeyword(keyword, PageRequest.of(page, pageSize));
 
     ClinicSearchResponseDTO dto = new ClinicSearchResponseDTO();
     dto.setClinics(clinics.getContent());
@@ -79,6 +79,7 @@ public class ClinicController {
 
     return ResponseEntity.ok(dto);
   }
+
 
 
 /* 병원 디테일 정보 */
@@ -96,7 +97,7 @@ public class ClinicController {
           @RequestParam(defaultValue = "0") int page,
           @RequestParam(defaultValue = "10") int pageSize
   ) {
-    Page<Clinic> clinics = clinicService.searchClinicsByAddress(address, PageRequest.of(page, pageSize));
+    Page<ClinicDTO> clinics = clinicService.searchClinicsByAddress(address, PageRequest.of(page, pageSize));
 
     ClinicSearchResponseDTO dto = new ClinicSearchResponseDTO();
     dto.setClinics(clinics.getContent());

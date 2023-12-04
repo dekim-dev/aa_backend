@@ -217,8 +217,9 @@ public class ClinicService {
 
 
   /* 키워드로 병원 검색 */
-  public Page<Clinic> searchClinicsByKeyword(String keyword, Pageable pageable) {
-    return clinicRepository.findByNameContaining(keyword, pageable);
+  public Page<ClinicDTO> searchClinicsByKeyword(String keyword, Pageable pageable) {
+    Page<Clinic> clinics = clinicRepository.findByNameContaining(keyword, pageable);
+    return clinics.map(this::convertToClinicDTO);
   }
 
 
@@ -229,9 +230,10 @@ public class ClinicService {
   }
 
 
-  /* 키워드로 병원 검색 */
-  public Page<Clinic> searchClinicsByAddress(String address, Pageable pageable) {
-    return clinicRepository.findByAddressContaining(address, pageable);
+  /* 주소로 병원 검색 */
+  public Page<ClinicDTO> searchClinicsByAddress(String address, Pageable pageable) {
+    Page<Clinic> clinics = clinicRepository.findByAddressContaining(address, pageable);
+    return clinics.map(this::convertToClinicDTO);
   }
 
   /* 병원 추천 */
