@@ -170,5 +170,20 @@ public class ClinicController {
     clinicService.deleteComment(commentId, Long.valueOf(userDetails.getUsername()));
     return new ResponseEntity<>("댓글 삭제 성공 ", HttpStatus.OK);
   }
+
+  /* 추천수로 병원 정렬 */
+//  @GetMapping("/recommend")
+//  public ResponseEntity<?> searchOrderByRecommendCount(
+//          @RequestParam(defaultValue = "0") int page,
+//          @RequestParam(defaultValue = "10") int pageSize
+//  ) {
+//    Page<ClinicDTO> clinics = clinicService.orderByRecommendCount(PageRequest.of(page, pageSize));
+//
+//    ClinicSearchResponseDTO dto = new ClinicSearchResponseDTO();
+//    dto.setClinics(clinics.getContent());
+//    dto.setTotalResults(clinics.getTotalElements());
+//
+//    return ResponseEntity.ok(dto);
+//  }
 }
 

@@ -1,9 +1,12 @@
 package dekim.aa_backend.persistence;
 
+import dekim.aa_backend.dto.ClinicDTO;
 import dekim.aa_backend.entity.Clinic;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,4 +19,7 @@ public interface ClinicRepository extends JpaRepository<Clinic, Long> {
   Page<Clinic> findByNameContaining(String keyword, Pageable pageable);
   Page<Clinic> findByAddressContaining(String address, Pageable pageable);
   Optional<Clinic> findById(Long id);
+
+//  Page<Clinic> findAllByOrderByRecommendationsDesc(Pageable pageable);
+
 }

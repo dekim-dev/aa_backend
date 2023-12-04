@@ -310,4 +310,10 @@ public class ClinicService {
       throw new IllegalArgumentException("Unauthorized : not your comment");
     }
   }
+
+//  // 추천수대로 병원 정렬
+//  public Page<ClinicDTO> orderByRecommendCount(Pageable pageable) {
+//    Page<Clinic> clinics = clinicRepository.findAllByOrderByRecommendationsDesc(pageable);
+//    return clinics.map(this::convertToClinicDTO);
+//  }
 }
