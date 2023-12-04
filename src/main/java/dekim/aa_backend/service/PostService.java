@@ -133,6 +133,7 @@ public class PostService {
             .commentsDTO(commentDTOList) // 댓글 정보를 CommentDTO의 리스트로 설정
             .likes(post.getLikes())
             .reportCount(post.getReportCount())
+            .commentsCount(post.getComments().size())
             .build();
   }
 
