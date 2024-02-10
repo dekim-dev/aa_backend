@@ -133,7 +133,8 @@ public class PostService {
             .commentsDTO(commentDTOList) // 댓글 정보를 CommentDTO의 리스트로 설정
             .likes(post.getLikes())
             .reportCount(post.getReportCount())
-            .commentsCount(post.getComments().size())
+//            .commentsCount(post.getComments().size())
+            // 2/10 글 작성 후 해당 게시글로 navigate시 나는 오류로 인해 주석 처리
             .build();
   }
 
